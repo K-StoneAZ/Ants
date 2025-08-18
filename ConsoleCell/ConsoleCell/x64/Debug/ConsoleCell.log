@@ -1,2 +1,5 @@
 ﻿  ConsoleCell.cpp
+  FieldCount.cpp
+  Gamefield.cpp
+  Generating Code...
   ConsoleCell.vcxproj -> C:\Users\kston\source\repos\ConsoleCell\x64\Debug\ConsoleCell.exe

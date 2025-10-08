@@ -1,0 +1,5 @@
+﻿  Start.cpp
+  mytest.cpp
+  Generating Code...
+C:\Users\kston\source\repos\mytest\mytest\Start.h(114,1): warning C4715: 'Start::Start0': not all control paths return a value
+  mytest.vcxproj -> C:\Users\kston\source\repos\mytest\x64\Debug\mytest.exe

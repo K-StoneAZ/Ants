@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 #include <ctime>
+#include <conio.h>
+#include <Windows.h>
 using namespace std;
 class Field
 {
@@ -20,6 +22,10 @@ protected:
 		int edge{ 0 };
 		int base{ 0 };
 		int str{ 0 };
+		int srow{ 0 };//screen coord line
+		int scol{ 0 };//screen coord character
+		int bg{ 0 };//bg color
+		int fg{ 0 };//text color
 	};
 	vector<vector<Cells>> field;
 public:
@@ -35,23 +41,69 @@ public:
 			else { setOwner(r, c, p_count); count++; }
 			if (count == 18) { p_count++; count = 0; }
 		}
-		for (int i = 0; i < rows; i++) {
+		for (int i = 0; i < rows; i++) {//set player colors
 			for (int j = 0; j < cols; j++) {
+				if (getOwner(i, j) == 0) { field[i][j].bg = 8; field[i][j].fg = 0; }
+				else { field[i][j].bg = (7 - getOwner(i, j)); field[i][j].fg = 0; }
+				field[i][j].srow = 1 + i * 3; field[i][j].scol = 7 + j * 7;
 				p_layer = getOwner(i, j);
 				setCell(i, j, p_layer);
 			}
 		}
 		setCellstr(players);
 	}
+	void SetColor(int testcolor, int bgcolor)
+	{
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		SetConsoleTextAttribute(hConsole,
+			(bgcolor << 4) | testcolor);
+	}
+	void Gotoxy(int x, int y)
+	{
+		COORD coord{ 0,0 };
+		coord.X = x;//character
+		coord.Y = y;//line
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+	}
+	void renderCell(int row, int col, bool selected = false)
+	{
+		// preserve the user's layout/padding logic
+		string pad = (field[row][col].ants > 9) ? "  " : "   ";
+
+		// top line (player number)
+		Gotoxy(field[row][col].scol, field[row][col].srow);
+		if (selected) {
+			// highlight: //Magenta, lt Cyan
+			SetColor(5 /*fg*/, 11 /*bg*/);
+		}
+		else {
+			SetColor(field[row][col].fg, field[row][col].bg);
+		}
+		cout << "   " << field[row][col].owner << "  ";
+
+		// bottom line (ants)
+		Gotoxy(field[row][col].scol, field[row][col].srow + 1);
+		if (selected) {
+			SetColor(5 /*fg*/, 11 /*bg*/);
+		}
+		else {
+			SetColor(field[row][col].fg, field[row][col].bg);
+		}
+		cout << pad << field[row][col].ants << "  ";
+
+		// restore default console colors
+		SetColor(7, 0);
+	}
 
 	//load data from save string
 	void loaddata(const string& data) {
 		istringstream ss(data);
 		string cellInfo;
-		int row, col, owner, ants, corner, edge, base, str;
+		int row, col, owner, ants, corner, edge, base, str, srow, scol, bg, fg;
 		while (getline(ss, cellInfo, '|')) {
 			istringstream cellStream(cellInfo);
-			if (!(cellStream >> row >> col >> owner >> ants >> corner >> edge >> base >> str)) {
+			if (!(cellStream >> row >> col >> owner >> ants >> corner >> edge >> base >> str >>
+				srow >> scol >> bg >> fg)) {
 				cout << "Error parsing cell data." << endl;
 				return;
 			}
@@ -65,6 +117,10 @@ public:
 			field[row][col].edge = edge;
 			field[row][col].base = base;
 			field[row][col].str = str;
+			field[row][col].srow = srow;
+			field[row][col].scol = scol;
+			field[row][col].bg = bg;
+			field[row][col].fg = fg;
 		}
 	}
 	//getters
@@ -110,7 +166,29 @@ public:
 		}
 		return 0;
 	}
-	struct Area {
+	int getFG(int row, int col) const {
+		if (row >= 0 && row < rows && col >= 0 && col < cols) {
+			return field[row][col].fg;
+		}
+		return 0;
+	}
+	int getBG(int row, int col) const {
+		if (row >= 0 && row < rows && col >= 0 && col < cols) {
+			return field[row][col].bg;
+		}
+		return 0;
+	}
+	int getsrow(int row, int col) {
+		if (row >= 0 && row < rows && col >= 0 && col < cols) {
+			return field[row][col].srow;
+		}
+	}
+	int getscol(int row, int col) {
+		if (row >= 0 && row < rows && col >= 0 && col < cols) {
+			return field[row][col].scol;
+		}
+	}
+		struct Area {
 		int rmin;
 		int rmax;
 		int cmin;
@@ -121,10 +199,10 @@ public:
 	};
 
 	Area getArea(int row, int col) const {
-		int rmin = std::max(0, row - 1);
-		int rmax = std::min(getRows() - 1, row + 1);
-		int cmin = std::max(0, col - 1);
-		int cmax = std::min(getCols() - 1, col + 1);
+		int rmin = max(0, row - 1);
+		int rmax = min(getRows() - 1, row + 1);
+		int cmin = max(0, col - 1);
+		int cmax = min(getCols() - 1, col + 1);
 		return Area(rmin, rmax, cmin, cmax);
 	}
 	string getSaveString() const {
@@ -134,7 +212,9 @@ public:
 				saveData += to_string(i) + " " + to_string(j) + " ";
 				saveData += to_string(field[i][j].owner) + " " + to_string(field[i][j].ants) + " ";
 				saveData += to_string(field[i][j].corner) + " " + to_string(field[i][j].edge) + " ";
-				saveData += to_string(field[i][j].base) + " " + to_string(field[i][j].str) + "|";
+				saveData += to_string(field[i][j].base) + " " + to_string(field[i][j].str) + " ";
+				saveData += to_string(field[i][j].srow) + " " + to_string(field[i][j].scol) + " ";
+				saveData += to_string(field[i][j].bg) = " " + to_string(field[i][j].fg) + "|";
 			}
 
 		}
@@ -225,82 +305,81 @@ public:
 			}
 		}
 	}
+	void setCellColor(int row, int col, int fg, int bg) {
+		field[row][col].fg = fg; field[row][col].bg = bg;
+	}
 	//printers
-	void printField() const {
+	void printField() {
 		int i = 0;
 		int row = getRows();
 		int col = getCols();
-		while (i < row) {
-			cout << "      ";
+		string pad{ "   " };
+		SetColor(7, 0);
+		Gotoxy(0, 0);
+		for (int i = 0; i < row; i++) {
+			cout << "      |";
 			for (int j = 0; j < col; j++) {
-				if (i < 10 && j < 10) {cout << " " << i << ", " << j << " |"; }
-				else if (i > 9 && j < 10) { cout << i << ", " << j << " |"; }
-				else if (i < 10 && j>9) { cout << " " << i << ", " << j << "|"; }
-				else { cout << i << ", " << j << "|"; }
+				if (i <= 9 && j <= 9) { cout << " " << i << ", " << j << " "; }
+				else if (i > 9 && j <= 9) { cout << i << ", " << j << " "; }
+				else if (i <= 9 && j > 9) { cout << " " << i << ", " << j; }
+				else { cout << i << ", " << j; }
+				cout << "|";
 			}
-			cout << "\nPlayer";
-			for (int j = 0; j < col; j++) {
-				cout << "   " << field[i][j].owner << "  |";
-			}cout << "\nAnts  ";
-			for (int j = 0; j < col; j++) {
-				if (field[i][j].ants > 9) {
-					cout << "  " << field[i][j].ants << "  |";
-				}
-				else {
-					cout << "   " << field[i][j].ants << "  |";
-				}
-			}cout << "\n";
-			i++;
+			cout << "\n      |";
+			for (int j = 0; j < row; j++) {
+				Gotoxy(field[i][j].scol, field[i][j].srow);
+				SetColor(field[i][j].fg, field[i][j].bg);
+				cout << "   " << field[i][j].owner << "  ";
+				SetColor(7, 0); cout << "|";
+			}
+			cout << "\n      |";
+			for (int j = 0; j < row; j++) {
+				pad = (field[i][j].ants > 9) ? "  " : "   ";
+				Gotoxy(field[i][j].scol, field[i][j].srow + 1);
+				SetColor(field[i][j].fg, field[i][j].bg);
+				cout << pad << field[i][j].ants << "  ";
+				SetColor(7, 0); cout << "|";
+			}
+			cout << "\n";
 		}
 	}//end printField()
-	void printPlayer(int player) const {
+	void printPlayer(int player) {
+		string pad{ "   " };
 		if (player < 0 || player > 8) { return; }
 		int row = getRows();
 		int col = getCols();
 		int i = 0;
-		while (i < row) {
-			cout << "      ";
-			for (int j = 0; j < col; j++) {//screen alignment
-				if (i < 10 && j < 10) {cout << " " << i << ", " << j << " |"; }
-				else if (i > 9 && j < 10) { cout << i << ", " << j << " |"; }
-				else if (i < 10 && j>9) { cout << " " << i << ", " << j << "|"; }
-				else { cout << i << ", " << j << "|"; }
-			}
-			cout << "\nPlayer";
+		for (int i = 0; i < row; i++){
 			for (int j = 0; j < col; j++) {
-				if (field[i][j].owner == player) {
-					cout << "   " << field[i][j].owner << "  |";
-				}
-				else { cout << "      |"; }
-			}
-			cout << "\nAnts  ";
-			for (int j = 0; j < col; j++) {
-				if (field[i][j].owner == player) {
-					if (field[i][j].ants > 9) {//change the padding
-						cout << "  " << field[i][j].ants << "  |";
-					}
-					else {
-						cout << "   " << field[i][j].ants << "  |";
-					}
+				if (getOwner(i,j) == player) {
+					Gotoxy(field[i][j].scol, field[i][j].srow);
+					SetColor(field[i][j].fg, field[i][j].bg);
+					cout << "   " << field[i][j].owner << "  ";
 				}
 				else {
-					cout << "      |";
+					Gotoxy(field[i][j].scol, field[i][j].srow);
+					SetColor(8,0);
+					cout << "   " << field[i][j].owner << "  ";
 				}
 			}
-			cout << "\nStrgth";
 			for (int j = 0; j < col; j++) {
-				if (field[i][j].owner == player) {
-					cout << "   " << field[i][j].str << "  |";
+				if (getOwner(i,j) == player) {
+					pad = (field[i][j].ants > 9) ? "  " : "   ";
+					Gotoxy(field[i][j].scol, field[i][j].srow + 1);
+					SetColor(field[i][j].fg, field[i][j].bg);
+					cout << pad << field[i][j].ants << "  ";
+					}
+				else {
+					pad = (field[i][j].ants > 9) ? "  " : "   ";
+					Gotoxy(field[i][j].scol, field[i][j].srow + 1);
+					SetColor(8, 0);
+					cout << pad << field[i][j].ants << "  ";
 				}
-				else { cout << "      |"; }
 			}
-			cout << "\n";
-			i++;
 		}
 	}
 	//end printPlayer
-	void printMinMax(int r, int c, int player) const {
-
+/*	void printMinMax(int r, int c, int player) const {
 		Area area = getArea(r, c);
 		int rmin = area.rmin, rmax = area.rmax, cmin = area.cmin, cmax = area.cmax;
 		int i = rmin;
@@ -341,5 +420,5 @@ public:
 				std::cout << "\n";
 			}
 		}
-	}// end of printMinMax
+	}// end of printMinMax*/
 };

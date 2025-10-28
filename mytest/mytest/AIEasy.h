@@ -72,22 +72,27 @@ public:
 
 	int Turn(Field& game, Player& player) {
 		string name = player.getPlayerName(currentPlayer);
-		name +=" is deploying fresh ants!";
-		delay(name, 4);
+		name +=" Growth Phase";
+		player.ToDialog(0, name, game);
+		player.delay(4);
 		growth = grow(game, player);
+		// may need player.ToGrowth(currentPlayer, game); // here
 		growth = player.runGrowth(currentPlayer, game);
 		game.printPlayer(currentPlayer);
 		name = player.getPlayerName(currentPlayer);
 		name += " Growth complete!";
-		if (growth){delay(name, 4);}
+		if (growth){
+			player.ToDialog(0, name, game);
+			player.delay(4);}
 		attack = att(game, player);
 		attack = player.runAttack(currentPlayer, game);
 		name = player.getPlayerName(currentPlayer);
 		name +=" Primary attack complete!";
-		delay(name, 4);
+		player.ToDialog(0, name, game);
+		player.delay(4);
 		game.printField();
-		player.PrintPlayerSummary();
-		delay("\nSetting up secondary attack.", 1);
+		player.PrintPlayerSummary(game);
+		player.ToDialog(1, "Setting up secondary attack.", game);
 		if(attack && !attack2){
 			game.printPlayer(currentPlayer);
 			attack2 = att2(game, player);
@@ -99,8 +104,10 @@ public:
 		}
 		if(attack2){
 			name = player.getPlayerName(currentPlayer);
-			name +=" Secondary attack complete!"; 
-			delay(name, 4);}
+			name +=" Attack complete!";
+			player.ToDialog(0, name, game);
+			player.delay(4);
+		}
 		game.printPlayer(currentPlayer);
 		move = movement(game, player);
 
@@ -108,12 +115,14 @@ public:
 			move = player.runMove(currentPlayer, game);
 			name = player.getPlayerName(currentPlayer);
 			name +=" Move complete!\n";
-			delay(name, 4);
+			player.ToDialog(0, name, game);
+			player.delay(4);
 		}
 		else { move = true;
 		name = player.getPlayerName(currentPlayer);
 		name += " Move complete!";
-		delay(name, 4);
+		player.ToDialog(0, name, game);
+		player.delay(4);
 		}
 		if(growth && attack && move){
 			enemy.clear(); MaxCell.clear(); aiStats.clear(); Move.clear();
@@ -163,6 +172,7 @@ public:
 		temp = player.getSourceAnts(currentPlayer);//growth ants from Main()
 		player.setTargetAnts(currentPlayer, temp);//place all growth in one cell
 		int row = player.getSourceRow(currentPlayer), col = player.getSourceCol(currentPlayer);
+		player.ToGrowth(currentPlayer, game);
 		//ready to run Growth Phase
 		return true;
 	}
@@ -182,8 +192,7 @@ public:
 		int k = 0;
 		if (enemys == 0) { return true; }
 		enemy.resize(enemys);
-		delay("Finding enemy cells:", 4);
-		cout << player.getPlayerName(currentPlayer)<<" Attacking from cell: " << row << ", " << col << "\n";
+		player.ToDialog(0,"Finding enemy cells:", game);
 		temp = 0;
 		for (int i = rmin; i <= rmax; i++) {
 			for (int j = cmin; j <= cmax; j++) {//something in here is messed up
@@ -219,9 +228,9 @@ public:
 					game.setAnts(row, col, 1);//update game cell ants
 				}
 			}
-			cout << "Attacking with " << player.getSourceAnts(currentPlayer) << " ants.";
-			cout << "\nEnemy Cell: " << r << ", " << c << " is " << player.getPlayerName(number);
-			cout << " defending with " << game.getAnts(r, c) << " ants.\n";
+			//cout << "Attacking with " << player.getSourceAnts(currentPlayer) << " ants.";
+			//cout << "\nEnemy Cell: " << r << ", " << c << " is " << player.getPlayerName(number);
+			//cout << " defending with " << game.getAnts(r, c) << " ants.\n";
 		}
 		else {
 			int random = 0 + rand() % enemys;
@@ -248,9 +257,6 @@ public:
 					game.setAnts(row, col, 1);//update game cell ants
 				}
 			}
-			cout << "\nAttacking with " << player.getSourceAnts(currentPlayer) << " ants.";
-			cout << "\nEnemy Cell: " << r << ", " << c << " is owned by " << player.getPlayerName(number);
-			cout << "\nand is defending with " << game.getAnts(r, c) << " ants.\n";
 		}
 		//Ready for attack phase
 		return true;
@@ -273,13 +279,11 @@ public:
 			row = srow; col = scol;
 			player.setSourceCell(currentPlayer, row, col);
 			player.setSourceAnts(currentPlayer, sant);
-			delay("Secondary source is Source cell:", 4);
 		}
 		else if (town == currentPlayer && tstr < 8 && tant > 1) {
 			row = trow; col = tcol;
 			player.setSourceCell(currentPlayer, row, col);
 			player.setSourceAnts(currentPlayer, tant);
-			delay("Secondary source is Target cell:", 4);
 		}
 		else { return false; }
 		Field::Area area = game.getArea(row, col);
@@ -287,7 +291,6 @@ public:
 		int enemys = 8 - game.getStr(row, col);
 		int k = 0;
 		enemy.resize(enemys);
-		cout << player.getPlayerName(currentPlayer) << " Attacking from cell: " << row << ", " << col << "\n";
 		int temp = 0;
 		for (int i = rmin; i <= rmax; i++) {
 			for (int j = cmin; j <= cmax; j++) {//something in here is messed up
@@ -323,10 +326,6 @@ public:
 					game.setAnts(row, col, 1);//update game cell ants
 				}
 			}
-
-			cout << "Attacking with " << player.getSourceAnts(currentPlayer) << " ants.";
-			cout << "\nEnemy Cell: " << r << ", " << c << " is " << player.getPlayerName(number);
-			cout << " defending with " << game.getAnts(r, c) << " ants.\n";
 		}
 		else {
 			int random = 0 + rand() % enemys;
@@ -353,13 +352,9 @@ public:
 					game.setAnts(row, col, 1);//update game cell ants
 				}
 			}
-			cout << "\nAttacking with " << player.getSourceAnts(currentPlayer) << " ants.";
-			cout << "\nEnemy Cell: " << r << ", " << c << " is owned by " << player.getPlayerName(number);
-			cout << "\nand is defending with " << game.getAnts(r, c) << " ants.\n";
 		}
 		//Ready for attack phase
 		return true;
-
 	}
 
 	int movement(Field& game, Player& player) {
@@ -414,9 +409,6 @@ public:
 						tant = current + sant - 1;
 						player.setSourceAnts(currentPlayer, tant);
 						game.setAnts(row1, col1, 2);
-						cout << player.getPlayerName(currentPlayer) << " is moving ";
-						cout << tant-1 << " from cell ";
-						cout << row1<<", "<<col1<<" to cell "<< r <<", "<< c <<".\n";
 						return true;
 					}
 				}
@@ -440,15 +432,12 @@ public:
 						tant = current + sant - 1;
 						player.setSourceAnts(currentPlayer, tant);
 						game.setAnts(row1, col1, 2);
-						cout << player.getPlayerName(currentPlayer) << " is moving ";
-						cout << tant-1 << " from cell ";
-						cout << row1 << ", " << col1 << " to cell " << r << ", " << c << ".\n";
 						return true;
 					}
 				}
 			}
 		}
-		cout << "No move this turn.\n";
+		player.ToDialog(0,"No move this turn.", game);
 		return false;//no move
 	}
 	int getCount() const {

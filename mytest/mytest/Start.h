@@ -54,7 +54,7 @@ public:
 		saveData = save.readSaveFile();
 		istringstream ss(saveData[0]);
 		ss >> gameSize >> numPlayers >> turncounter;
-		Player players(numPlayers + 1);
+		Player players(numPlayers);
 		players.loaddata(saveData[1]);
 		return players;
 	}
@@ -110,15 +110,18 @@ public:
 				}
 				cout << "Invalid choice. Please try again." << endl;
 			}
-		} 
+		}
+		return true;
 	}
-	bool nextTurn() {
+	bool nextTurn(Field& game, Player& player) {
 		int a{ 0 };
-		cout << "Would you like to save this game or continue?  1 = Continue: 2 = Save: ";
+		player.ToDialog(0,"Continue or Save?  1 or 2 ", game);
+		game.SetColor(1, 7);
 		while (a < 1 || a > 2) {
 			cin >> a;
-		if (a == 1) { return false; }
+			if (a == 1) { game.SetColor(7, 0); return false; }
 		}
+		game.SetColor(7, 0);
 		return true;
 	}
 	int saveGame(Field& game, Player& player, int turncounter) {
@@ -126,22 +129,21 @@ public:
 		savegame.assembleSaveString(game, player, turncounter);
 		test = savegame.writeSaveFile();
 		if (test != 0) {
-			cout << "Error saving game." << endl;
+			player.ToDialog(0,"Error saving game.", game);
 			return 0;
 		}
-		cout << "Game saved successfully." << endl;
+		player.ToDialog(0,"Game saved successfully.", game);
 		return 1;
 	}
-	int nextTurn1() {
-		cout << "Would you like to continue or quit? 1 = Continue: 2 = Quit: ";
+	int nextTurn1(Field& game, Player& player) {
+		player.ToDialog(0,"Continue or quit ? 1 or 2 ", game);
 		int a{ 0 };
+		game.SetColor(1, 7);
 		while (a < 1 || a > 2) {
 			cin >> a;
-			if (a == 1) { return 1; }
-			else if (a == 2) { return 2; }
-			else { cout << "Invalid input. Please enter 1 to continue or 2 to quit: "; }
 		}
-		return 1;
+		game.SetColor(7, 0);
+		return a;
 	}
 };
 

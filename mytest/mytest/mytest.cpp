@@ -54,7 +54,10 @@ static void RunTurn(Player& player, Field& game) {
 		bool growth = false, attack = false, second = false, move = false, aiFlag = false;
 		player.countCellsOwned(game);
 		game.printField();
-		player.PrintPlayerSummary();
+		player.Status(game);
+		player.Growth(game);
+		player.Dialog(game);
+		player.PrintPlayerSummary(game);
 		if (player.getCellsOwned(i) == 0) {
 			continue; // skip turn if player has no cells
 		}
@@ -78,7 +81,10 @@ static void RunTurn(Player& player, Field& game) {
 			}
 			// Move Phase
 			game.printPlayer(i);
-			cout << player.getPlayerName(i)<<", would you like to Move? (Y)es. ";
+			string name = player.getPlayerName(i);
+			name += " Move Phase. ";
+			player.ToDialog(0, name, game);
+			player.ToDialog(1,"Would you like to Move? (Y)es. ", game);
 			char a = ' ';
 			cin >> a; a = toupper(a);
 			if (a != 'Y') { move = true; }
@@ -105,17 +111,22 @@ static void CheckWin(Field& game, Player& player, Start& start) {
 	player.countCellsOwned(game);
 	won = player.Win(game);
 	while (!won) {
-		cout << "\n" << turncounter << "\n";
+		//cout << "\n" << turncounter << "\n";
 		RunTurn(player, game);
 		won = player.Win(game);
+		game.SetColor(7, 0);
+		system("cls");
 		game.printField();
-		player.PrintPlayerSummary();
-		if (start.nextTurn()) {
+		player.Status(game);
+		player.Growth(game);
+		player.Dialog(game);
+		player.PrintPlayerSummary(game);
+		if (start.nextTurn(game, player)) {
 			if (!start.saveGame(game, player, turncounter)) {// game not saved error}
 			}
 			else {
-				cout << "Game Saved.\n";
-				if (start.nextTurn1() == 2) { quit(); }
+				player.ToDialog(0,"Game Saved.", game);
+				if (start.nextTurn1(game, player) == 2) { quit(); }
 				else { continue; }
 			}
 		}
@@ -124,12 +135,16 @@ static void CheckWin(Field& game, Player& player, Start& start) {
 }
 int main()
 {
+	HWND hwnd = GetConsoleWindow();
 	// create Player obj and Field obj
 	Save savegame;
 	Start start;
+	HWND owner = GetWindow(hwnd, GW_OWNER);
+	SetWindowPos(owner, nullptr, 0, 0, 980, 1020, SWP_NOZORDER);
 	started = start.Start0(savegame);
 	Player player = Gamestart0(started, start, savegame);
 	Field game = Gamestart1(started, start, savegame);
+	system("cls");
 	CheckWin(game, player, start);
 
 

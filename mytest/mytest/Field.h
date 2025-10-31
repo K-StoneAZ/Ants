@@ -379,46 +379,5 @@ public:
 		}
 	}
 	//end printPlayer
-/*	void printMinMax(int r, int c, int player) const {
-		Area area = getArea(r, c);
-		int rmin = area.rmin, rmax = area.rmax, cmin = area.cmin, cmax = area.cmax;
-		int i = rmin;
-		while (i >= rmin && i <= rmax) {
-			for (int j = cmin; j <= cmax; ++j) {
-				std::cout << "      ";
-				for (int j = cmin; j <= cmax; ++j) {//screen alignment
-					if (i < 10 && j < 10) {	cout << " " << i << ", " << j << " |"; }
-					else if (i > 9 && j < 10) { cout << i << ", " << j << " |"; }
-					else if (i < 10 && j>9) { cout << " " << i << ", " << j << "|"; }
-					else { cout << i << ", " << j << "|"; }
-				}
-				std::cout << "\nPlayer";
-				for (int j = cmin; j <= cmax; ++j) {
-					std::cout << "   " << field[i][j].owner;
-					std::cout << "  |";
-				}
-				std::cout << "\nAnts  ";
-				for (int j = cmin; j <= cmax; ++j) {
-					if (field[i][j].ants > 9) {
-						std::cout << "  " << field[i][j].ants; // If < 9
-					}
-					else {
-						std::cout << "   " << field[i][j].ants;
-					}
-					std::cout << "  |";
-				}
-				std::cout << "\nStrnth";
-				for (int j = cmin; j <= cmax; ++j) {
-					std::cout << "   " << field[i][j].str;
-					std::cout << "  |";
-				}
-				i++;
-				if (i > rmax) {
-					std::cout << "\n";
-					break; // Exit if we exceed the maximum row limit
-				}
-				std::cout << "\n";
-			}
-		}
-	}// end of printMinMax*/
+
 };

@@ -210,7 +210,6 @@ public:
 			}
 			else {
 				player.setSourceCell(playerNum, r, c);
-				game.renderCell(r, c, true);
 				validSource = true;
 			}
 			validSource = true;

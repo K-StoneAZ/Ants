@@ -47,8 +47,7 @@ public:
 		}
 	}
 
-	int temp1{};
-	int temp2{};
+	int temp1{}, temp2{}, mouseR{}, mouseC{};
 
 	// load player data from save string
 	void loaddata(const string& data) {
@@ -79,66 +78,61 @@ public:
 	void getMouse(Field& game)
 	{
 		INPUT_RECORD ir[128];
-		HANDLE       hStdInput = NULL;
-		HANDLE       hStdOutput = NULL;
-		HANDLE       hEvent = NULL;
-		DWORD        nRead;
-		COORD        xy = { 0,0 };
+		HANDLE hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+		DWORD nRead = 0;
+		DWORD mode = 0;
 
-		hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-		hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		// Save current console mode
+		if (!GetConsoleMode(hStdInput, &mode)) {
+			// Could not get mode; nothing to restore later, just return
+			return;
+		}
+
+		// Enable mouse input and extended flags (keep echo/line as original code did)
 		SetConsoleMode(hStdInput, ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS);
 		FlushConsoleInputBuffer(hStdInput);
-		hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-		HANDLE handles[2] = { hEvent, hStdInput };
-		int row{}, col{};
-		while (WaitForMultipleObjects(2, handles, FALSE, INFINITE))
-		{																  //is initially set to non-signaled.  The 2nd
-			ReadConsoleInput(hStdInput, ir, 128, &nRead);
-			for (size_t i = 0; i < nRead; i++)
+
+		// Loop waiting for console input events. ReadConsoleInput blocks until events arrive.
+		while (true)
+		{
+			if (!ReadConsoleInput(hStdInput, ir, 128, &nRead)) {
+				// If reading fails, restore mode and exit
+				SetConsoleMode(hStdInput, mode);
+				return;
+			}
+
+			for (DWORD i = 0; i < nRead; ++i)
 			{
-				switch (ir[i].EventType)
+				if (ir[i].EventType == MOUSE_EVENT)
 				{
-/*				case KEY_EVENT:
-					if (ir[i].Event.KeyEvent.wVirtualKeyCode == VK_ESCAPE)
-						if (hEvent != NULL) {
-							SetEvent(hEvent);
-						}
-						else
-						{
-							xy.X = 0; xy.Y = 0;
-							SetConsoleCursorPosition(hStdOutput, xy);
-							printf
-							(
-								"AsciiCode = %d: symbol = %c\n",
-								ir[i].Event.KeyEvent.uChar.AsciiChar,
-								ir[i].Event.KeyEvent.uChar.AsciiChar
-							);
-						}
-					break;*/
-				case MOUSE_EVENT:
-					// Get mouse position
-					int mouseX = ir[i].Event.MouseEvent.dwMousePosition.X;
-					int mouseY = ir[i].Event.MouseEvent.dwMousePosition.Y;
-					// Check for left button press (bit 0)
-					bool leftClick = (ir[i].Event.MouseEvent.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED);
-					if (leftClick) {
+					MOUSE_EVENT_RECORD& me = ir[i].Event.MouseEvent;
+					// Only act on button-state change events (dwEventFlags == 0)
+					// and when the left button is pressed.
+					if (me.dwEventFlags == 0 &&
+						(me.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED))
+					{
+						int mouseX = me.dwMousePosition.X;
+						int mouseY = me.dwMousePosition.Y;
 						// Map mouseX, mouseY to board indices (same mapping used elsewhere)
-						col = (mouseX - 7) / 7;
-						row = (mouseY - 1) / 3;
+						int col = (mouseX - 7) / 7;
+						int row = (mouseY - 1) / 3;
 						if (col >= 0 && col < game.getCols() && row >= 0 && row < game.getRows()) {
 							// highlight selected cell
 							game.renderCell(row, col, true);
 							temp1 = row; temp2 = col;
+							// Restore original console mode and return
+							SetConsoleMode(hStdInput, mode);
 							return;
 						}
 					}
-					break;
 				}
 			}
 		}
-	}
 
+		// Restore console mode as a safety (unreachable in normal flow)
+		SetConsoleMode(hStdInput, mode);
+		return;
+	}
 	int getNumPlayers() const {
 		return numPlayers;
 	}
@@ -172,11 +166,17 @@ public:
 	int getTargetAnts(int playerID) const {
 		return playerStats[playerID].tant;
 	}
-	int getTemp1() const {
+	int getTemp1() const {//converted mouse row to cell row coord
 		return temp1;
 	}
-	int getTemp2() const {
+	int getTemp2() const {//converted mouse column to cell column coord
 		return temp2;
+	}
+	int getMouseR() const {//mouse row character coord
+		return mouseR;
+	}
+	int getMouseC() const {//mouse column character coord
+		return mouseC;
 	}
 	string getSaveString() const {
 		string saveData{ "" };
@@ -386,23 +386,6 @@ void ToDialog(int line, string msg, Field& game) {//left edge 48, top line 37 ma
 			//cout << playerStats[i].playerName << " owns " << playerStats[i].cells_owned << " cells." << endl;
 		}
 	}
-	void PrintAll() const {
-		for (int i = 0; i < numPlayers; i++) {
-			cout << "Player ID: " << playerStats[i].playerID << ", Name: " << playerStats[i].playerName << ", Type: ";
-			if (playerStats[i].playertype == 0) {
-				cout << "Reserved" << endl;
-			}
-			else if (playerStats[i].playertype == 1) {
-				cout << "Human" << endl;
-			}
-			else {
-				cout << "AI" << endl;
-			}
-			cout << "Cells Owned: " << playerStats[i].cells_owned << endl;
-			cout << "Source: (" << playerStats[i].srow << ", " << playerStats[i].scol << ") with " << playerStats[i].sant << " ants." << endl;
-			cout << "Target: (" << playerStats[i].trow << ", " << playerStats[i].tcol << ") with " << playerStats[i].tant << " ants." << endl;
-		}
-	}
     // Count cells owned by each player
 
 	void countCellsOwned(Field& game) {
@@ -504,11 +487,13 @@ void ToDialog(int line, string msg, Field& game) {//left edge 48, top line 37 ma
 					game.setCellColor(trow, tcol, game.getFG(srow, scol), game.getBG(srow, scol));
 					game.setAnts(trow, tcol, attack);
 					ToDialog(0, "Attacker wins this battle!", game);
+					delay(3);
 					return true;
 				}
 				else if (attack == 0) {//defender wins battle
 					game.setAnts(trow, tcol, defend);
 					ToDialog(0, "Defender wins this battle!", game);
+					delay(3);
 					return false;
 				}
 			}

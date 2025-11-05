@@ -275,10 +275,9 @@ public:
 				game.renderCell(r, c, true);
 				validTarget = true;
 			}
-			move = player.runMove(playerNum, game);
-			return move;
 		}
-		return true;
+		move = player.runMove(playerNum, game);
+		return move;
 	}
 };
 

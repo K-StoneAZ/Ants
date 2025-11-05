@@ -214,7 +214,7 @@ public:
 				saveData += to_string(field[i][j].corner) + " " + to_string(field[i][j].edge) + " ";
 				saveData += to_string(field[i][j].base) + " " + to_string(field[i][j].str) + " ";
 				saveData += to_string(field[i][j].srow) + " " + to_string(field[i][j].scol) + " ";
-				saveData += to_string(field[i][j].bg) = " " + to_string(field[i][j].fg) + "|";
+				saveData += to_string(field[i][j].bg) + " " + to_string(field[i][j].fg) + "|";
 			}
 
 		}

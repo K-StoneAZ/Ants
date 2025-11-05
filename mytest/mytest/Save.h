@@ -54,7 +54,7 @@ public:
 			cerr << "Uh oh, antsave.txt could not be opened for writing!\n";
 			return 1;
 		}
-		for (int i = 0; i < saveString.size(); i++) {
+		for (size_t i = 0; i < saveString.size(); i++) {
 			outf << saveString[i];
 		}
 		outf.close();// write complete close file

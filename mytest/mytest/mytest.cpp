@@ -1,10 +1,6 @@
 // mytest.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <cstdlib>
-#include <vector>
-#include <sstream>
 #include "Player.h"
 #include "Field.h"
 #include "Human.h"
@@ -18,7 +14,25 @@ int turncounter = 1;
 bool started = false;
 
 
-static void quit() { exit(0); }
+static int askRestartOrExit() {
+	system("cls");
+	cout << "New game or exit? 1 or 2\n";
+	int a{ 0 };
+	while (a == 0) {
+		cin >> a;
+		if (cin.fail()) { cin.clear(); a = 0; }
+		if (a == 1) {
+			return 1;
+		}
+		else if (a == 2) {
+			return 2;
+		}
+		else {
+			cout << "Invalid input. Please enter 1 or 2." << endl;
+		}
+	}
+	return 2;
+}
 
 static Player Gamestart0(bool started, Start& start, Save& savegame) {
 	cout << "Welcome to the Ants Game!" << endl;
@@ -126,7 +140,7 @@ static void CheckWin(Field& game, Player& player, Start& start) {
 			}
 			else {
 				player.ToDialog(0,"Game Saved.", game);
-				if (start.nextTurn1(game, player) == 2) { quit(); }
+				if (start.nextTurn1(game, player) == 2) { break; }
 				else { continue; }
 			}
 		}
@@ -141,12 +155,25 @@ int main()
 	Start start;
 	HWND owner = GetWindow(hwnd, GW_OWNER);
 	SetWindowPos(owner, nullptr, 0, 0, 980, 1020, SWP_NOZORDER);
-	started = start.Start0(savegame);
-	Player player = Gamestart0(started, start, savegame);
-	Field game = Gamestart1(started, start, savegame);
-	system("cls");
-	CheckWin(game, player, start);
+	while (true) {
+	Restart:
+		turncounter = 1;//reset turn counter
+		started = start.Start0(savegame);
+		{
+			Player player = Gamestart0(started, start, savegame);
+			Field game = Gamestart1(started, start, savegame);
+			system("cls");
+			CheckWin(game, player, start);
+		}
+		int choice = askRestartOrExit();
+		if (choice == 1) {
+			goto Restart;
+		}
+		else {
+			break;
+		}
+	}
 
 
-
+	return 0;
 }

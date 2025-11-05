@@ -1,8 +1,4 @@
-﻿  AIEasy.cpp
-  Human.cpp
-  Player.cpp
-  Save.cpp
-  Start.cpp
+﻿  Human.cpp
   mytest.cpp
   Generating Code...
   mytest.vcxproj -> C:\Users\kston\source\repos\mytest\x64\Debug\mytest.exe

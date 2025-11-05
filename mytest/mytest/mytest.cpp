@@ -7,6 +7,7 @@
 #include "AIEasy.h"
 #include "Start.h"
 #include "Save.h"
+#include "version.h"
 
 
 using namespace std;
@@ -155,6 +156,9 @@ int main()
 	Start start;
 	HWND owner = GetWindow(hwnd, GW_OWNER);
 	SetWindowPos(owner, nullptr, 0, 0, 980, 1020, SWP_NOZORDER);
+	cout << "Ants Game " << APP_VERSION 
+		<< " (commit " << APP_COMMIT 
+		<< ") built " << APP_BUILD_TIME << "\n";
 	while (true) {
 	Restart:
 		turncounter = 1;//reset turn counter

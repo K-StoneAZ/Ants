@@ -459,8 +459,9 @@ void ToDialog(int line, string msg, Field& game) {//left edge 48, top line 37 ma
 		int srow = getSourceRow(playerNum); int scol = getSourceCol(playerNum);//selected by player
 		int sOwner = game.getOwner(srow, scol); string sName = getPlayerName(sOwner);//from Player
 		int tOwner = game.getOwner(trow, tcol); string tName = getPlayerName(tOwner);//From Player
-		//cout <<sName<< " attacking from cell: " << srow << ", " << scol << " with " << attack << " ants.\n";
-		//cout <<tName<< " defending from cell: " << trow << ", " << tcol << " with " << defend << " ants.\n";
+		int bonus{};
+		if (defend > 0) { bonus = (attack - defend) * 5; }
+		if (bonus <= 0) { bonus = 0; }
 		ToAttack(playerNum, attack, defend, atroll, defroll, game);
 		if (game.getOwner(trow, tcol) == 0) {//step into unowned cell
 			game.setOwner(trow, tcol, playerNum);
@@ -471,7 +472,9 @@ void ToDialog(int line, string msg, Field& game) {//left edge 48, top line 37 ma
 		else {
 			srand((unsigned)time(0));//battle between players
 			while (defend != 0 && attack != 0) {
-				atroll = (1 + rand() % 99);
+				int temp = (1 + rand() % 99);
+				temp += bonus;
+				atroll = min(99, temp);
 				defroll = (1 + rand() % 99);
 				if (atroll > defroll) {//attack roll wins
 					defend--;

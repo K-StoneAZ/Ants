@@ -1,0 +1,32 @@
+Ants Change Log
+Version 1.0.0
+First working version.
+	human player only for each of 8 players
+
+Version 1.1.0
+added save game function
+added AI player
+
+Version 1.2.0
+reworked start game functionality
+added color function throughout
+added limited Mouse functionality
+
+Version 1.2.1
+rework color function
+
+Version 1.2.2
+added static Status message block
+added static Growth/Attack message block
+added static Dialog message block
+
+Version 1.2.3
+rework Mouse functionality
+
+Version 1.2.4
+added Attack/Defense bonus
+	+/-3% attacking ants vs defending ants
+
+added rendering highlight of AI attack and target cell
+
+modified several Dialog message changes

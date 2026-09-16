@@ -21,7 +21,8 @@ static const wchar_t* gRobotNames[] = {
 
 const wchar_t* m_personaNames[] =
 {
-    L"Persona 333", L"Persona 111", L"Persona 222", L"Persona 232", L"Persona 313"
+    L"Persona 323", L"Persona 322", L"Persona 321", L"Persona 223",
+    L"Persona 221", L"Persona 123", L"Persona 122", L"Persona 121"
 };
 
 const COLORREF gLABELColor = RGB(0, 0, 255);// blue
@@ -95,35 +96,53 @@ private:
        switch (index)
        {
        case 1:
-           persona.growth = Balanced;
-           persona.attack = Balanced;
-           persona.move = Balanced;
+           persona.growth = Balanced;// 3
+           persona.attack = Defensive;// 2
+           persona.move = Balanced;// 3
            break;
 
        case 2:
-           persona.growth = Aggressive;
-           persona.attack = Aggressive;
-           persona.move = Aggressive;
+           persona.growth = Balanced;// 3
+           persona.attack = Defensive;// 2
+           persona.move = Defensive;// 2
            break;
 
        case 3:
-           persona.growth = Defensive;
-           persona.attack = Defensive;
-           persona.move = Defensive;
+           persona.growth = Balanced;// 3
+           persona.attack = Defensive;// 2
+           persona.move = Aggressive;// 1
+
            break;
 
        case 4:
-           persona.growth = Defensive;
-           persona.attack = Balanced;
-           persona.move = Defensive;
+           persona.growth = Defensive;// 2
+           persona.attack = Defensive;// 2
+           persona.move = Balanced;// 3
            break;
 
        case 5:
-           persona.growth = Balanced;
-           persona.attack = Aggressive;
-           persona.move = Balanced;
+           persona.growth = Defensive;// 2
+           persona.attack = Defensive;// 2
+           persona.move = Aggressive;// 1
            break;
 
+       case 6:
+           persona.growth = Aggressive;// 1
+           persona.attack = Defensive;// 2
+           persona.move = Balanced;// 3
+           break;
+
+       case 7:
+           persona.growth = Aggressive;// 1
+           persona.attack = Defensive;// 2
+           persona.move = Defensive;// 2
+           break;
+
+       case 8:
+           persona.growth = Aggressive;// 1
+           persona.attack = Defensive;// 2
+           persona.move = Aggressive;// 1
+           break;
            // etc.
        }
 

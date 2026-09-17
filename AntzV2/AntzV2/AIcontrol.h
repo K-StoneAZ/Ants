@@ -840,7 +840,7 @@ public:
                 candidates = personaCandidates;
             }
 
-            if (m_difficulty > 1)
+            if (m_difficulty >= 1)
             {
                 auto growth = Filter(candidates, [&](int row, int col)
                     {

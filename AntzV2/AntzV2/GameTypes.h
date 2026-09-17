@@ -42,7 +42,7 @@ struct GameConfig
     int m_Difficulty = 1;
     int m_StartCells = 15;
     int m_AttackPerTurn = 2;
-    bool m_DebugField = true;
+    bool m_DebugField = false;
 };
 
 enum class WinType

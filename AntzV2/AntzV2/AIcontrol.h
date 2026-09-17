@@ -829,7 +829,7 @@ public:
                 personaCandidates = AggressiveGrowth(
                     field, m_playerID, candidates);
             }
-            else if (m_players[m_playerID].m_persona.growth == Defensive && m_difficulty == 1)
+            else if (m_players[m_playerID].m_persona.growth == Defensive && m_difficulty >= 1)
             {
                 personaCandidates = DefensiveGrowth(
                     field, m_playerID, candidates);

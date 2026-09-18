@@ -1107,7 +1107,7 @@ public:
                 {
                     m_personaIndex++;
 
-                    if (m_personaIndex > 8)
+                    if (m_personaIndex > 5)
                         m_personaIndex = 1;
 
                     m_players[i].m_persona = GetPersona((int)m_personaIndex);

@@ -6,6 +6,7 @@
 #include "GameTypes.h"
 #include "Setup.h"
 #include "Game.h"
+#include <commdlg.h>
 #include <ctime>
 #include <cstdlib>
 
@@ -364,6 +365,36 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    return TRUE;
 }
+void SaveGameDialog(HWND hWnd)
+{
+    wchar_t fileName[MAX_PATH] = L"";
+
+    OPENFILENAMEW ofn = {};
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = hWnd;
+    ofn.lpstrFile = fileName;
+    ofn.nMaxFile = MAX_PATH;
+    ofn.lpstrFilter =
+        L"Antz Save Files (*.antz)\0*.antz\0"
+        L"All Files (*.*)\0*.*\0";
+    ofn.nFilterIndex = 1;
+    wchar_t exePath[MAX_PATH];
+    GetExeDirectory(exePath, MAX_PATH);
+    ofn.lpstrInitialDir = exePath;
+    ofn.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST;
+    ofn.lpstrDefExt = L"antz";
+
+    if (GetSaveFileNameW(&ofn))
+    {
+        int result = gGame.Save(fileName);
+
+        if (result == 0)
+            OutputDebugStringW(L"Game saved successfully\n");
+        else
+            OutputDebugStringW(L"Game save failed\n");
+    }
+}
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -375,6 +406,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Parse the menu selections:
             switch (wmId)
             {
+            case ID_FILE_SAVEGAME:
+                OutputDebugStringW(L"Save Game selected\n");
+                SaveGameDialog(hWnd);
+                break;
+
+            case ID_FILE_LOAD:
+                OutputDebugStringW(L"Load Game selected\n");
+                break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;

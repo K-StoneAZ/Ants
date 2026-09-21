@@ -193,6 +193,17 @@ public:
 
     GameResult GetResult() const { return m_result; }
 
+    int Save(const wchar_t* filename) 
+    {
+        FILE* file = nullptr;
+
+        if (_wfopen_s(&file, filename, L"wb") != 0)
+            return 1;
+
+        fclose(file);
+        return 0;
+    }
+
     void SetupGame(const GameConfig& config, const std::vector<PlayerConfig>& players)
     {
         m_config = config;

@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <string>
 #include <vector>
+#include <cstring>
+#include <cstdlib>
 #include "GameTypes.h"
 #include "TextBox.h"
 #include "Field.h"
@@ -197,12 +199,52 @@ public:
     {
         FILE* file = nullptr;
 
-        if (_wfopen_s(&file, filename, L"wb") != 0)
+        if (_wfopen_s(&file, filename, L"w") != 0)
             return 1;
+
+        fprintf(file, "%d|%d|%d|%d|%d\n",
+            m_config.m_FieldSize,
+            m_config.m_ActivePlayers,
+            m_config.m_Difficulty,
+            m_config.m_StartCells,
+            m_config.m_AttackPerTurn);
+
+        for (int i = 1; i <= m_config.m_ActivePlayers; i++)
+        {
+            fprintf(file, "%d|%s|%ls\n",
+                m_playerConfig[i].m_isHuman,
+                m_playerConfig[i].m_PlayerName.c_str(),
+                m_playerConfig[i].m_personaName.c_str());
+        }
+
+        fprintf(file, "%d|%d\n",
+            m_activePlayer,
+            gTurn);
+
+        m_field.SaveField(file);
 
         fclose(file);
         return 0;
     }
+
+    void Load(const wchar_t* filename) 
+    {
+        FILE* file = nullptr;
+        if (_wfopen_s(&file, filename, L"rb") != 0)
+            return;
+
+        char line[256];
+
+        if (fgets(line, sizeof(line), file) == nullptr)
+        {
+            fclose(file);
+            return;
+        }
+
+        int fieldSize = atoi(line);
+
+        fclose(file);
+	}
 
     void SetupGame(const GameConfig& config, const std::vector<PlayerConfig>& players)
     {
@@ -1555,6 +1597,11 @@ void OnChar(char ch)
     {
         return m_activePlayer;
     }
+
+ bool CanSave() const
+ {
+     return m_turnState == T_GROWTH;
+ }
 
  void Render()
     {

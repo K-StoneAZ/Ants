@@ -95,31 +95,55 @@ public:
 		setCellstr(players);
 	}
 
-	//load data from save string
-/*	void loaddata(const string& data) {
-		istringstream ss(data);
-		string cellInfo;
-		int row, col, owner, ants, corner, edge, base, str;
-		while (getline(ss, cellInfo, '|')) {
-			istringstream cellStream(cellInfo);
-			if (!(cellStream >> row >> col >> owner >> ants >> corner >> edge >> base >> str))
-			{
-				cout << "Error parsing cell data." << endl;
-				return;
-			}
-			if (row < 0 || row >= rows || col < 0 || col >= cols) {
-				cout << "Invalid cell coordinates in save data." << endl;
-				return;
-			}
-			field[row][col].owner = owner;
-			field[row][col].ants = ants;
-			field[row][col].corner = corner;
-			field[row][col].edge = edge;
-			field[row][col].base = base;
-			field[row][col].str = str;
+	//load data from File
+	void LoadFieldInit(const GameConfig& config, FILE* file)
+	{
+		rows = config.m_FieldSize;
+		cols = config.m_FieldSize;
 
+		field.clear();
+		field.resize(rows, std::vector<Cells>(cols, { 0,0 }));
+		for (int i = 0; i < rows; i++)
+		{
+			for (int j = 0; j < cols; j++)
+			{
+				setCell(i, j, 0);
+			}
 		}
-	}*/
+		char line[512];
+
+		for (int row = 0; row < rows; row++)
+		{
+			if (fgets(line, sizeof(line), file) == nullptr)
+			{
+				return;
+			}
+
+			std::stringstream rowStream(line);
+			std::string cellData;
+
+			for (int col = 0; col < cols; col++)
+			{
+				if (!std::getline(rowStream, cellData, '|'))
+				{
+					return;
+				}
+
+				std::stringstream cellStream(cellData);
+
+				int owner = 0;
+				int ants = 0;
+
+				cellStream >> owner;
+				cellStream.ignore(1, ',');
+				cellStream >> ants;
+
+				field[row][col].owner = owner;
+				field[row][col].ants = ants;
+			}
+		}
+		setCellstr(config.m_ActivePlayers + 1);
+	}
 	//getters
 	int getRows() const {
 		return rows;
@@ -205,20 +229,23 @@ public:
 		int cmax = min(getCols() - 1, col + 1);
 		return Area(rmin, rmax, cmin, cmax);
 	}
-/*	string getSaveString() const {
-		string saveData{ "" };
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				saveData += to_string(i) + " " + to_string(j) + " ";
-				saveData += to_string(field[i][j].owner) + " " + to_string(field[i][j].ants) + " ";
-				saveData += to_string(field[i][j].corner) + " " + to_string(field[i][j].edge) + " ";
-				saveData += to_string(field[i][j].base) + " " + to_string(field[i][j].str) +  "|";
-			}
+	//Save Field to file
+	void SaveField(FILE* file)
+	{
+		for (int row = 0; row < rows; row++)
+		{
+			for (int col = 0; col < cols; col++)
+			{
+				fprintf(file, "%d,%d", field[row][col].owner, field[row][col].ants);
 
+				if (col < cols - 1)
+				{
+					fprintf(file, "|");
+				}
+			}
+			fprintf(file, "\n");
 		}
-		saveData += "\n";
-		return saveData;
-	}*/
+	}
 	//Setters
 	void SetVisualMode(int row, int col, VisualMode mode)
 	{

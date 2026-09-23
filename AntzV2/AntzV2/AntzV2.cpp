@@ -408,7 +408,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
             case ID_FILE_SAVEGAME:
                 OutputDebugStringW(L"Save Game selected\n");
-                SaveGameDialog(hWnd);
+                if (gGame.CanSave())
+                {
+                    SaveGameDialog(hWnd);
+                }
+                else
+                {
+                    OutputDebugStringW(L"Save Game unavailable at this time\n");
+                }
                 break;
 
             case ID_FILE_LOAD:

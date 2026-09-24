@@ -199,7 +199,7 @@ public:
     {
         FILE* file = nullptr;
 
-        if (_wfopen_s(&file, filename, L"w") != 0)
+        if (_wfopen_s(&file, filename, L"w") != 0 || file == nullptr)
             return 1;
 
         fprintf(file, "%d|%d|%d|%d|%d\n",
@@ -223,14 +223,14 @@ public:
 
         m_field.SaveField(file);
 
-        fclose(file);
+        if (file) { fclose(file); }
         return 0;
     }
 
     void Load(const wchar_t* filename) 
     {
         FILE* file = nullptr;
-        if (_wfopen_s(&file, filename, L"rb") != 0)
+        if (_wfopen_s(&file, filename, L"r") != 0 || file == nullptr)
             return;
 
         char line[256];
@@ -241,7 +241,69 @@ public:
             return;
         }
 
-        int fieldSize = atoi(line);
+        //Game Config
+        std::stringstream configStream(line);
+        std::string value;
+
+        std::getline(configStream, value, '|');
+        m_config.m_FieldSize = std::stoi(value);
+
+        std::getline(configStream, value, '|');
+        m_config.m_ActivePlayers = std::stoi(value);
+
+        std::getline(configStream, value, '|');
+        m_config.m_Difficulty = std::stoi(value);
+
+        std::getline(configStream, value, '|');
+        m_config.m_StartCells = std::stoi(value);
+
+        std::getline(configStream, value, '|');
+        m_config.m_AttackPerTurn = std::stoi(value);
+
+        // Player Config
+        m_playerConfig.clear();
+        m_playerConfig.push_back(PlayerConfig{});
+
+        for (int i = 1; i <= m_config.m_ActivePlayers; i++)
+        {
+            if (fgets(line, sizeof(line), file) == nullptr)
+            {
+                fclose(file);
+                return;
+            }
+
+            std::stringstream playerStream(line);
+            PlayerConfig player;
+
+            std::getline(playerStream, value, '|');
+            player.m_isHuman = std::stoi(value);
+
+            std::getline(playerStream, player.m_PlayerName, '|');
+
+            std::getline(playerStream, value);
+            player.m_personaName = std::wstring(value.begin(), value.end());
+            player.m_persona = Setup::GetPersonaIndex(player.m_personaName);
+
+            m_playerConfig.push_back(player);
+        }
+
+		// Game State
+        if (fgets(line, sizeof(line), file) == nullptr)
+        {
+            fclose(file);
+            return;
+        }
+
+        std::stringstream gameStream(line);
+
+        std::getline(gameStream, value, '|');
+        m_activePlayer = std::stoi(value);
+
+        std::getline(gameStream, value);
+        gTurn = std::stoi(value);
+
+		// Load Field
+		m_field.LoadFieldInit(m_config, file);
 
         fclose(file);
 	}

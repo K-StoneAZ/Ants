@@ -19,12 +19,12 @@ static const wchar_t* gRobotNames[] = {
     L"GERTY", L"HAL-9000"
 };
 
-const wchar_t* m_personaNames[] =
+static const wchar_t* m_personaNames[] =
 {
     L"Persona 333", L"Persona 111", L"Persona 222", L"Persona 232", L"Persona 313",
     L"Persona 133", L"Persona 212", L"Persona 112"
 };
-const size_t m_personaCount = sizeof(m_personaNames) / sizeof(m_personaNames[0]);
+static const size_t m_personaCount = sizeof(m_personaNames) / sizeof(m_personaNames[0]);
 
 const COLORREF gLABELColor = RGB(0, 0, 255);// blue
 const COLORREF gVALUEColor = RGB(120, 120, 180);// purple
@@ -90,7 +90,7 @@ private:
            CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
            DEFAULT_PITCH, L"Arial");
    }
-   Persona GetPersona(int index)
+   static Persona GetPersona(int index)
    {
        Persona persona;
 
@@ -162,6 +162,17 @@ public:
         return ready;
 	}
     void ClearReady() { ready = false; }
+
+    static Persona GetPersonaIndex(const std::wstring& personaName)
+    {
+        for (int i = 0; i < static_cast<int>(m_personaCount); i++)
+        {
+            if (m_personaNames[i] == personaName)
+                return GetPersona(i + 1);
+        }
+
+        return Persona{};
+    }
     bool ValidFieldSize()
     {
         int requiredCells = m_config.m_StartCells * m_config.m_ActivePlayers;

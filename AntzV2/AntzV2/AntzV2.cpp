@@ -394,6 +394,51 @@ void SaveGameDialog(HWND hWnd)
             OutputDebugStringW(L"Game save failed\n");
     }
 }
+void LoadGameDialog(HWND hWnd)
+{
+    if (gAppState == APP_GAME)
+    {
+        int result = MessageBoxW(
+            hWnd,
+            L"Loading a saved game will erase the current game.\n\nDo you want to continue?",
+            L"Load Game",
+            MB_YESNO | MB_ICONWARNING);
+
+        if (result != IDYES)
+            return;
+    }
+
+    wchar_t fileName[MAX_PATH] = L"";
+
+    OPENFILENAMEW ofn = {};
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = hWnd;
+    ofn.lpstrFile = fileName;
+    ofn.nMaxFile = MAX_PATH;
+    ofn.lpstrFilter =
+        L"Antz Save Files (*.antz)\0*.antz\0"
+        L"All Files (*.*)\0*.*\0";
+    ofn.nFilterIndex = 1;
+    wchar_t exePath[MAX_PATH];
+    GetExeDirectory(exePath, MAX_PATH);
+    ofn.lpstrInitialDir = exePath;
+    ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+    ofn.lpstrDefExt = L"antz";
+
+    if (GetOpenFileNameW(&ofn))
+    {
+        if (gGame.Load(fileName))
+        {
+            gAppState = APP_GAME;
+            OutputDebugStringW(L"Game loaded\n");
+        }
+        else
+        {
+            gAppState = APP_SETUP;
+            OutputDebugStringW(L"Game load failed\n");
+        }
+    }
+}
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -420,6 +465,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             case ID_FILE_LOAD:
                 OutputDebugStringW(L"Load Game selected\n");
+                LoadGameDialog(hWnd);
                 break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);

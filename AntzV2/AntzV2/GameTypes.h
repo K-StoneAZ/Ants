@@ -172,5 +172,6 @@ int DebugField[42][3] = {
 
 const int TitleSize = 32;
 const int TextSize = 20;
+bool m_growthStart = false;
 extern int gTurn;
 

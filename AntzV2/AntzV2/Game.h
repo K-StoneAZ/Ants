@@ -227,18 +227,18 @@ public:
         return 0;
     }
 
-    void Load(const wchar_t* filename) 
+    bool Load(const wchar_t* filename) 
     {
         FILE* file = nullptr;
         if (_wfopen_s(&file, filename, L"r") != 0 || file == nullptr)
-            return;
+            return false;
 
         char line[256];
 
         if (fgets(line, sizeof(line), file) == nullptr)
         {
             fclose(file);
-            return;
+            return false;
         }
 
         //Game Config
@@ -260,6 +260,9 @@ public:
         std::getline(configStream, value, '|');
         m_config.m_AttackPerTurn = std::stoi(value);
 
+        //AI difficulty
+        m_aiC.SetDifficulty(m_config.m_Difficulty);
+
         // Player Config
         m_playerConfig.clear();
         m_playerConfig.push_back(PlayerConfig{});
@@ -269,7 +272,7 @@ public:
             if (fgets(line, sizeof(line), file) == nullptr)
             {
                 fclose(file);
-                return;
+                return false;
             }
 
             std::stringstream playerStream(line);
@@ -291,7 +294,7 @@ public:
         if (fgets(line, sizeof(line), file) == nullptr)
         {
             fclose(file);
-            return;
+            return false;
         }
 
         std::stringstream gameStream(line);
@@ -302,10 +305,50 @@ public:
         std::getline(gameStream, value);
         gTurn = std::stoi(value);
 
+		//Rebuild m_players
+        m_players.clear();
+
+        // Player 0 is always reserved
+        PlayerData reserved;
+        reserved.m_playerID = 0;
+        reserved.m_playerName = "Unowned";
+        reserved.m_playertype = 0;
+
+        m_players.push_back(reserved);
+
+        for (int i = 1; i <= m_config.m_ActivePlayers; i++)
+        {
+            PlayerData player;
+            player.m_playerID = i;
+            player.m_playerName = m_playerConfig[i].m_PlayerName;
+            player.m_persona = m_playerConfig[i].m_persona;
+            if (m_playerConfig[i].m_isHuman)
+            {
+                player.m_playertype = 1;
+            }
+            else
+            {
+                player.m_playertype = 2;
+            }
+            player.m_cells_owned = 0;
+            player.srow = 0;
+            player.scol = 0;
+            player.trow = 0;
+            player.tcol = 0;
+            player.sant = 0;
+            player.tant = 0;
+            player.selectS = false;
+            player.selectT = false;
+            m_players.push_back(player);
+		}
+
 		// Load Field
 		m_field.LoadFieldInit(m_config, file);
 
         fclose(file);
+        m_turnState = T_START;
+        UpdateTurn();
+		return true;
 	}
 
     void SetupGame(const GameConfig& config, const std::vector<PlayerConfig>& players)
@@ -691,6 +734,7 @@ void UpdateTurn()
             m_players[m_activePlayer].selectT = false;
             m_field.SetPlayerVisualMode(m_activePlayer);
 
+            m_growthStart = true;
             m_turnState = T_GROWTH;
             m_dialog.m_mode = DIALOG_GROWTH;
 
@@ -1062,6 +1106,7 @@ void HandleGrowthClick(ClickType click, int row = -1, int col = -1)
     // All validation passed
          m_error.clear();
 
+        m_growthStart = false;
         ApplyGrowth(amount);
 
             // Clear current selection
@@ -1662,7 +1707,7 @@ void OnChar(char ch)
 
  bool CanSave() const
  {
-     return m_turnState == T_GROWTH;
+     return m_turnState == T_GROWTH && m_growthStart;
  }
 
  void Render()

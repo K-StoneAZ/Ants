@@ -56,8 +56,8 @@ private:
     COLORREF m_playerColors[9] =
     {
 		RGB(200, 200, 200), // 0 dark gray (unowned)
-        RGB(255, 80, 80),   // 1 Red
-        RGB(80, 80, 255),   // 2 Blue
+        RGB(255, 90, 90),   // 1 Red
+        RGB(90, 90, 255),   // 2 Blue
         RGB(80, 220, 80),   // 3 Green
         RGB(255, 220, 80),  // 4 Yellow
         RGB(220, 80, 220),  // 5 Purple
@@ -69,8 +69,8 @@ private:
 	COLORREF m_antColor2 = RGB(255, 255, 255);// White
     // Visual mode colors
     COLORREF m_growthColor = RGB(80, 255, 80);// Light Green
-    COLORREF m_attackSourceColor = RGB(80, 80, 255);//Light Blue
-    COLORREF m_attackTargetColor = RGB(255, 80, 80);//Light Red
+    COLORREF m_attackSourceColor = RGB(0, 0, 200);//Dark Blue
+    COLORREF m_attackTargetColor = RGB(200, 0, 0);//Dark Red
     COLORREF m_moveSourceColor = RGB(80, 220, 220);// Cyan
     COLORREF m_moveTargetColor = RGB(200, 80, 255);//Purple
 
@@ -440,14 +440,7 @@ public:
 
             DeleteObject(playerBrush);
 
-            // Choose text color
-            COLORREF textColor = m_antColor2;
-
-            if (player.m_playerID == 0 || player.m_playerID == 4 ||
-                player.m_playerID == 6 || player.m_playerID == 7)
-            { textColor = m_antColor1; }
-
-            SetTextColor(m_hdc, textColor);
+            SetTextColor(m_hdc, m_antColor1);
             SetBkMode(m_hdc, TRANSPARENT);
 
             // Draw player name
@@ -511,15 +504,14 @@ public:
             frame.right - BORDER_SIZE, paneBottom };
 
         // Attacker pane
-        HBRUSH attackerBrush = CreateSolidBrush(m_attackSourceColor);
+        HBRUSH attackerBrush = CreateSolidBrush(m_playerColors[players[thisPlayer].m_playerID]);
         FillRect(m_hdc, &attackerRect, attackerBrush);
         DeleteObject(attackerBrush);
 
         // Defender pane
-        HBRUSH defenderBrush = CreateSolidBrush(m_attackTargetColor);
+        HBRUSH defenderBrush = CreateSolidBrush(m_playerColors[players[thisPlayer].tplayerID]);
         FillRect(m_hdc, &defenderRect, defenderBrush);
         DeleteObject(defenderBrush);
-
 
         SetTextColor(m_hdc, m_antColor1);
         SetBkMode(m_hdc, TRANSPARENT);

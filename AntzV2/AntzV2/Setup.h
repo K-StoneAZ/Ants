@@ -12,6 +12,8 @@ extern int gHeight;
 extern std::mt19937 gRNG;
 extern HINSTANCE hInst;
 extern AppState gAppState;
+extern HBITMAP gSetupBackgroundBmp;
+
 static const wchar_t* gRobotNames[] = {
     L"R2-D2", L"C-3PO", L"HK-47", L"WALL-E",
     L"T-800", L"T-1000", L"ED-209", L"ASIMO",
@@ -47,7 +49,7 @@ private:
     HWND m_hWnd = nullptr;
     HFONT m_titleFont = nullptr;
     HFONT m_textFont = nullptr;
-    HBITMAP m_hBackground = nullptr;
+    
     GameConfig m_config;
     GameResult m_result;
     std::vector<PlayerConfig> m_players; // 0 player is reserved, Max 8 active players
@@ -436,16 +438,9 @@ public:
     }
     bool Initialize(HWND hWnd)
     {
-        wchar_t path[MAX_PATH];
-        GetExeDirectory(path, MAX_PATH);
-        wcscat_s(path, L"SetupBackground.bmp");
-
-        m_hBackground = (HBITMAP)LoadImage( nullptr, path,
-                IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-
         DefineFonts();
 
-        return (m_hBackground != nullptr);
+        return true;
     }
     void Shutdown()
     {
@@ -460,24 +455,19 @@ public:
             DeleteObject(m_textFont);
             m_textFont = nullptr;
         }
-        if (m_hBackground)
-        {
-            DeleteObject(m_hBackground);
-            m_hBackground = nullptr;
-        }
     }
     void RenderBackground(HDC hdc)
     {
-        if (!m_hBackground)
+        if (!gSetupBackgroundBmp)
             return;
 
         HDC memDC = CreateCompatibleDC(hdc);
 
         HBITMAP oldBitmap =
-            (HBITMAP)SelectObject(memDC, m_hBackground);
+            (HBITMAP)SelectObject(memDC, gSetupBackgroundBmp);
 
         BITMAP bm;
-        GetObject(m_hBackground, sizeof(bm), &bm);
+        GetObject(gSetupBackgroundBmp, sizeof(bm), &bm);
 
         StretchBlt( hdc, 0, 0, gWidth, gHeight, memDC,
             0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);

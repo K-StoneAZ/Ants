@@ -44,6 +44,7 @@ AppState gAppState = APP_TITLE;
 
 HBITMAP gTitleBmp = nullptr;
 HDC gTitleDC = nullptr;
+HBITMAP gSetupBackgroundBmp = nullptr;
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -184,6 +185,27 @@ void LoadTitleScreen()
     ReleaseDC(nullptr, hdc);
 
     SelectObject(gTitleDC, gTitleBmp);
+}
+void LoadSetupBackground()
+{
+    wchar_t path[MAX_PATH];
+    GetExeDirectory(path, MAX_PATH);
+    wcscat_s(path, L"SetupBackground.bmp");
+
+    if (!FileExists(path))
+        return;
+
+    gSetupBackgroundBmp = (HBITMAP)LoadImage(
+        nullptr, path, IMAGE_BITMAP,
+        0, 0, LR_LOADFROMFILE);
+}
+void FreeSetupBackground()
+{
+    if (gSetupBackgroundBmp)
+    {
+        DeleteObject(gSetupBackgroundBmp);
+        gSetupBackgroundBmp = nullptr;
+    }
 }
 void FreeTitleScreen()
 {
@@ -484,6 +506,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         gHwnd = hWnd;
         InitBackBuffer(hWnd);
         LoadTitleScreen();
+        LoadSetupBackground();
         gSetup.Initialize(hWnd);
         gGame.Initialize(gMemDC);
         gGame.SetRepaintCallback(RepaintGame);
@@ -617,6 +640,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_DESTROY:
 		FreeTitleScreen();
+        FreeSetupBackground();
         gSetup.Shutdown();
         if (gMemDC)
         {

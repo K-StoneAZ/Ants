@@ -123,6 +123,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="About.h" />
     <ClInclude Include="AIcontrol.h" />
     <ClInclude Include="AntzV2.h" />
     <ClInclude Include="Field.h" />

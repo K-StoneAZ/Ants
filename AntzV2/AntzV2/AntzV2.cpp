@@ -6,6 +6,7 @@
 #include "GameTypes.h"
 #include "Setup.h"
 #include "Game.h"
+#include "About.h"
 #include <commdlg.h>
 #include <ctime>
 #include <cstdlib>
@@ -39,6 +40,7 @@ std::mt19937 gRNG;
 Setup gSetup;
 Game gGame;
 GameResult g_Result;
+About gAbout;
 
 AppState gAppState = APP_TITLE;
 
@@ -657,21 +659,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 // Message handler for about box.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
 
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-};

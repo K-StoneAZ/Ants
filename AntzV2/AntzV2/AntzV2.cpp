@@ -256,7 +256,14 @@ void RenderTitle()
 
 void RenderBackBuffer() {
     if (!gMemDC)
+    {
         return;
+    }
+    if (gAbout.IsVisible())
+    {
+        gAbout.Paint(gMemDC);
+        return;
+    }
 
     //1.Clear screen
     RECT rc = { 0, 0, gClientWidth, gClientHeight };
@@ -542,6 +549,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_LBUTTONDOWN:
     {
+        if (gAbout.IsVisible())
+        {
+            if (gAbout.HandleMouse(message, wParam, lParam))
+            {
+                return 0;
+            }
+        }
+
         POINT pt = ClientToGamePoint(lParam);
         switch (gAppState)
         {
@@ -616,6 +631,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         return 0;
     }
+    case WM_KEYDOWN:
+    {
+        if (gAbout.IsVisible())
+        {
+            if (gAbout.HandleKey(message, wParam, lParam))
+            {
+                return 0;
+            }
+        }
+
+        return 0;
+    }
     case WM_CHAR:
     {
         if (gAppState == APP_SETUP)
@@ -634,9 +661,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
 	case WM_MOUSEMOVE:
     {
-        //POINT pt = ClientToGamePoint(lParam);
-        //if (gAppState == APP_GAME)
-        //gGame.HandleMouseMove(pt.x, pt.y);
+        if (gAbout.IsVisible())
+        {
+            if (gAbout.HandleMouse(message, wParam, lParam))
+            {
+                return 0;
+            }
+        }
+
         return 0;
     }
 

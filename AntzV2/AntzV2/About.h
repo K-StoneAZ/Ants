@@ -34,17 +34,19 @@ private:
     RECT m_menuRects[6] = {};
 
     HFONT m_textFont = nullptr;
-    const int TextSize = 16;
+    const int TextSize = 22;
     int m_selectedItem = 0;
 	int m_hoverItem = -1;
+    bool m_visible = false;
 
     void DefineMenuRects()
     {
         RECT rc;
         GetClientRect(m_hWnd, &rc);
 
-        const int left = 100;
-        const int right = rc.right - 100;
+        const int menuWidth = 10 * TextSize;
+        const int left = (rc.right - menuWidth) / 2;
+        const int right = left + menuWidth;
         const int rowHeight = 35;
         const int totalHeight = rowHeight * 6;
         const int top = (rc.bottom - totalHeight) / 2;
@@ -101,9 +103,15 @@ public:
 
     void Show()
     {
+        m_visible = true;
         m_page = A_Menu;
         m_selectedItem = 0;
         InvalidateRect(m_hWnd, nullptr, FALSE);
+    }
+
+    bool IsVisible() const
+    {
+        return m_visible;
     }
 
     void Paint(HDC hdc)
@@ -146,8 +154,20 @@ public:
 
     bool HandleMouse(UINT message, WPARAM wParam, LPARAM lParam)
     {
-        if (m_page != A_Menu)
+        if (!m_visible)
+        {
             return false;
+        }
+        if (m_page != A_Menu)
+        {
+            if (message == WM_LBUTTONDOWN)
+                {
+                    m_page = A_Menu;
+                    InvalidateRect(m_hWnd, nullptr, FALSE);
+                    return true;
+                }            
+             return false;
+        }
 
         if (message == WM_MOUSEMOVE)
         {
@@ -187,6 +207,8 @@ public:
                 }
             }
 
+            m_visible = false;
+            InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;
         }
 
@@ -196,17 +218,34 @@ public:
     bool HandleKey(UINT message, WPARAM wParam, LPARAM lParam)
     {
         if (message != WM_KEYDOWN)
+        {
             return false;
+        }
+
+        if (!m_visible)
+        {
+            return false;
+        }
 
         if (wParam == VK_ESCAPE)
         {
-            m_page = A_Menu;
+            if (m_page != A_Menu)
+            {
+                m_page = A_Menu;
+            }
+            else
+            {
+                m_visible = false;
+            }
+
             InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;
         }
 
         if (m_page != A_Menu)
+        {
             return false;
+        }
 
         switch (wParam)
         {

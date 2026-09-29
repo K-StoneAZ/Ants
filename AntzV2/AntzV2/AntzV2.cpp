@@ -56,7 +56,8 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+
 
 POINT ClientToGamePoint(LPARAM lParam)
 {
@@ -492,7 +493,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 LoadGameDialog(hWnd);
                 break;
             case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+                gAbout.Initialize(hWnd);
+                gAbout.Show();
+                InvalidateRect(hWnd, nullptr, FALSE);
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);

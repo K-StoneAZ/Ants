@@ -34,8 +34,12 @@ private:
     RECT m_menuRects[6] = {};
 
     HFONT m_textFont = nullptr;
+	HFONT m_headerFont = nullptr;
+	HFONT m_bodyFont = nullptr;
     const int TextSize = 22;
-    int m_selectedItem = 0;
+    const int HeaderSize = 20;
+	const int BodySize = 18;
+    int m_selectedItem = -1;
 	int m_hoverItem = -1;
     bool m_visible = false;
 
@@ -68,7 +72,265 @@ private:
             DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
             CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
             DEFAULT_PITCH, L"Arial");
+
+        m_headerFont = CreateFont(
+            HeaderSize, 0, 0, 0, FW_NORMAL,
+            FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+            CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+            DEFAULT_PITCH, L"Arial");
+
+        m_bodyFont = CreateFont(
+            BodySize, 0, 0, 0, FW_NORMAL,
+            FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
+            CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+            DEFAULT_PITCH, L"Arial");
     }
+
+
+    void Rules(HDC hdc)
+    {
+        SetBkMode(hdc, TRANSPARENT);
+
+        HFONT oldFont = (HFONT)SelectObject(hdc, m_textFont);
+
+        SetTextColor(hdc, RGB(255, 255, 255));
+
+        // Page title
+        SelectObject(hdc, m_headerFont);
+        RECT titleRect = { 0, 115, gWidth, 150 };
+        DrawText(hdc, L"RULES", -1, &titleRect, DT_CENTER | DT_SINGLELINE);
+
+        // Content
+        const int left = 180;
+        const int right = gWidth - 180;
+
+        int y = 180;
+
+        SelectObject(hdc, m_headerFont);
+        RECT rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Objective", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 28;
+        SelectObject(hdc, m_bodyFont);
+        rect = { left, y, right, y + 45 };
+        DrawText(hdc,
+            L"Control enough of the battlefield to win, or eliminate your opponents.",
+            -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 75;
+
+        SelectObject(hdc, m_headerFont);
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"The Battlefield", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 28;
+        SelectObject(hdc, m_bodyFont);
+        rect = { left, y, right, y + 50 };
+        DrawText(hdc,
+            L"The battlefield is a grid of cells. Each cell contains ants and is either "
+            L"unowned or controlled by a player.",
+            -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 80;
+
+        SelectObject(hdc, m_headerFont);
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Your Turn", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 28;
+        SelectObject(hdc, m_bodyFont);
+        rect = { left, y, right, y + 50 };
+        DrawText(hdc,
+            L"A turn proceeds through Growth, Attack, Move, and End. During Growth, "
+            L"your territory produces additional ants.",
+            -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 80;
+
+        SelectObject(hdc, m_headerFont);
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Attack and Capture", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 28;
+        SelectObject(hdc, m_bodyFont);
+        rect = { left, y, right, y + 50 };
+        DrawText(hdc,
+            L"Attack adjacent enemy cells. Battles are resolved with attack and "
+            L"defense rolls. A successful attack captures the target cell.",
+            -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 80;
+
+        SelectObject(hdc, m_headerFont);
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Victory", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 28;
+        SelectObject(hdc, m_bodyFont);
+        rect = { left, y, right, y + 50 };
+        DrawText(hdc,
+            L"The game ends when a player meets the selected victory condition: "
+            L"Domination or Elimination.",
+            -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        SelectObject(hdc, oldFont);
+
+    }
+
+    void Controls(HDC hdc)
+    {
+        SetBkMode(hdc, TRANSPARENT);
+
+        HFONT oldFont = (HFONT)SelectObject(hdc, m_textFont);
+
+        SetTextColor(hdc, RGB(255, 255, 255));
+
+        // Page title
+        SelectObject(hdc, m_headerFont);
+        RECT titleRect = { 0, 115, gWidth, 150 };
+        DrawText(hdc, L"CONTROLS", -1, &titleRect, DT_CENTER | DT_SINGLELINE);
+
+        // Content
+        const int left = 450;
+        const int right = gWidth - 350;
+
+        int y = 180;
+
+        SelectObject(hdc, m_headerFont);
+        RECT rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Setup", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 28;
+        SelectObject(hdc, m_bodyFont);
+        rect = { left, y, right, y + 100 };
+        DrawText(hdc,
+            L"Mouse over to highlight.\n" L"Click to select or <Enter> to confirm.",
+            -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 125;
+
+        SelectObject(hdc, m_headerFont);
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Gameplay", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 28;
+        SelectObject(hdc, m_bodyFont);
+        rect = { left, y, right, y + 150 };
+        DrawText(hdc,
+            L"Mouse over to highlight.\n"
+            L"Click to select.\n"
+            L"Click or <Enter> to confirm.\n" L"Click or <Space> to skip.\n"
+            L"Number keys to enter ant count.",
+            -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 175;
+
+        SelectObject(hdc, m_headerFont);
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"About", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 28;
+        SelectObject(hdc, m_bodyFont);
+        rect = { left, y, right, y + 100 };
+        DrawText(hdc,
+            L"Mouse over to highlight.\n"
+            L"Click or <Enter> to select.\n"
+            L"Arrow keys to navigate and highlight.\n"
+            L"Escape to return.",
+            -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        SelectObject(hdc, oldFont);
+    }
+
+    void AImenu(HDC hdc)
+    {
+        SetBkMode(hdc, TRANSPARENT);
+
+        HFONT oldFont = (HFONT)SelectObject(hdc, m_textFont);
+
+        SetTextColor(hdc, RGB(255, 255, 255));
+
+        // Page title
+        SelectObject(hdc, m_headerFont);
+        RECT titleRect = { 0, 115, gWidth, 150 };
+        DrawText(hdc, L"AI", -1, &titleRect, DT_CENTER | DT_SINGLELINE);
+
+        // Content
+        const int left = 350;
+        const int right = gWidth - 250;
+
+        int y = 180;
+
+        SetTextColor(hdc, RGB(255, 215, 0));
+        SelectObject(hdc, m_headerFont);
+        RECT rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Difficulty", -1, &rect, DT_LEFT | DT_SINGLELINE);
+        SetTextColor(hdc, RGB(255, 255, 255));
+        y += 30;
+
+        SelectObject(hdc, m_bodyFont);
+
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Easy", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 25;
+        rect = { left + 30, y, right, y + 30 };
+        DrawText(hdc, L"Basic growth and attack choices.", -1, &rect,
+            DT_LEFT | DT_SINGLELINE);
+
+        y += 40;
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Medium", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 25;
+        rect = { left + 30, y, right, y + 30 };
+        DrawText(hdc, L"More strategic growth and attack choices.", -1, &rect,
+            DT_LEFT | DT_SINGLELINE);
+
+        y += 40;
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Hard", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 25;
+        rect = { left + 30, y, right, y + 30 };
+        DrawText(hdc, L"Advanced evaluation of growth and attack opportunities.",
+            -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 55;
+
+        SetTextColor(hdc, RGB(255, 215, 0));
+        SelectObject(hdc, m_headerFont);
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Personality", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 30;
+
+        SetTextColor(hdc, RGB(255, 255, 255));
+        SelectObject(hdc, m_bodyFont);
+
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Aggressive", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 25;
+        rect = { left + 30, y, right, y + 30 };
+        DrawText(hdc, L"Favors offensive actions against other players.",
+            -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 40;
+        rect = { left, y, right, y + 25 };
+        DrawText(hdc, L"Balanced", -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 25;
+        rect = { left + 30, y, right, y + 30 };
+        DrawText(hdc, L"Balances expansion, offense, and defense.",
+            -1, &rect, DT_LEFT | DT_SINGLELINE);
+
+        y += 40;
+        rect = { left, y, right, y + 25 };
+    }
+
 
     void RenderBackground(HDC hdc)
     {
@@ -105,7 +367,7 @@ public:
     {
         m_visible = true;
         m_page = A_Menu;
-        m_selectedItem = 0;
+        m_selectedItem = -1;
         InvalidateRect(m_hWnd, nullptr, FALSE);
     }
 
@@ -122,9 +384,17 @@ public:
 
         SetBkMode(hdc, TRANSPARENT);
 
-        if (m_page != A_Menu)
+        if (m_page == A_Rules)
         {
-            // temporary page
+            Rules(hdc);
+        }
+        else if (m_page == A_Controls)
+        {
+            Controls(hdc);
+        }
+        else if (m_page == A_AI)
+        {
+            AImenu(hdc);
         }
         else
         {

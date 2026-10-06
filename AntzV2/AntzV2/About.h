@@ -32,6 +32,7 @@ private:
         L"Credits"
     };
     RECT m_menuRects[6] = {};
+    RECT m_howToRects[5] = {};
 
     HFONT m_textFont = nullptr;
 	HFONT m_headerFont = nullptr;
@@ -331,6 +332,62 @@ private:
         rect = { left, y, right, y + 25 };
     }
 
+    void HowTo(HDC hdc)
+    {
+        SetBkMode(hdc, TRANSPARENT);
+        HFONT oldFont = (HFONT)SelectObject(hdc, m_textFont);
+        SetTextColor(hdc, RGB(255, 255, 255));
+        // Page title
+        RECT titleRect = { 0, 115, gWidth, 150 };
+        DrawText(hdc, L"HOW TO", -1, &titleRect, DT_CENTER | DT_SINGLELINE);
+        // Content
+        enum HowToPage
+        {
+            H_Menu,
+            H_Growth,
+            H_Attack,
+            H_Move,
+            H_Defense,
+            H_Strategy
+        };
+        const wchar_t* menuItems[5] =
+        {
+            L"Growth",
+            L"Attack",
+            L"Move",
+            L"Defense",
+            L"Strategy"
+        };
+        int menuWidth = 10 * TextSize;
+        int rowHeight = 35;
+        int menuHeight = 5 * rowHeight;
+
+        int left = (gWidth - menuWidth) / 2;
+        int top = (gHeight - menuHeight) / 2;
+
+        for (int i = 0; i < 5; ++i)
+        {
+            m_howToRects[i] = { left, top + (i * rowHeight),
+                          left + menuWidth, top + ((i + 1) * rowHeight) };
+
+            RECT rect = m_howToRects[i];
+
+            if (i == m_selectedItem || i == m_hoverItem)
+            {
+                SetTextColor(hdc, RGB(0, 255, 255));
+            }
+            else
+            {
+                SetTextColor(hdc, RGB(255, 255, 255));
+            }
+
+            DrawText(hdc, menuItems[i], -1, &rect,
+                DT_CENTER | DT_SINGLELINE | DT_VCENTER);
+        }
+
+        SelectObject(hdc, oldFont);
+	}
+
 
     void RenderBackground(HDC hdc)
     {
@@ -396,6 +453,10 @@ public:
         {
             AImenu(hdc);
         }
+        else if (m_page == A_HowTo)
+        {
+            HowTo(hdc);
+        }
         else
         {
             for (int i = 0; i < 6; ++i)
@@ -430,13 +491,20 @@ public:
         }
         if (m_page != A_Menu)
         {
-            if (message == WM_LBUTTONDOWN)
-                {
-                    m_page = A_Menu;
-                    InvalidateRect(m_hWnd, nullptr, FALSE);
-                    return true;
-                }            
-             return false;
+            if (m_page == A_HowTo)
+            {
+                // allow How To mouse handling below
+            }
+            else if (message == WM_LBUTTONDOWN)
+            {
+                m_page = A_Menu;
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         if (message == WM_MOUSEMOVE)
@@ -445,13 +513,26 @@ public:
             int y = HIWORD(lParam);
 
             int hoverItem = -1;
-
-            for (int i = 0; i < 6; ++i)
+            if (m_page == A_Menu)
             {
-                if (PtInRect(&m_menuRects[i], POINT{ x, y }))
+                for (int i = 0; i < 6; ++i)
                 {
-                    hoverItem = i;
-                    break;
+                    if (PtInRect(&m_menuRects[i], POINT{ x, y }))
+                    {
+                        hoverItem = i;
+                        break;
+                    }
+                }
+            }
+            else if (m_page == A_HowTo)
+            {
+                for (int i = 0; i < 5; ++i)
+                {
+                    if (PtInRect(&m_howToRects[i], POINT{ x, y }))
+                    {
+                        hoverItem = i;
+                        break;
+                    }
                 }
             }
 
@@ -472,6 +553,11 @@ public:
                 if (PtInRect(&m_menuRects[i], POINT{ x, y }))
                 {
                     m_page = static_cast<AboutPage>(i + 1);
+                    if (m_page == A_HowTo)
+                    {
+                        m_selectedItem = -1;
+                        m_hoverItem = -1;
+                    }
                     InvalidateRect(m_hWnd, nullptr, FALSE);
                     return true;
                 }

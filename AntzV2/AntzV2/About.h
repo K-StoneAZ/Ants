@@ -32,7 +32,33 @@ private:
         L"Credits"
     };
     RECT m_menuRects[6] = {};
+    enum HowToPage
+    {
+        H_Menu,
+        H_Growth,
+        H_Attack,
+        H_Move,
+        H_Defense,
+        H_Strategy
+    };
+    HowToPage m_howToPage = H_Menu;
+    const wchar_t* menuItems[5] =
+    {
+        L"Growth",
+        L"Attack",
+        L"Move",
+        L"Defense",
+        L"Strategy"
+    };
     RECT m_howToRects[5] = {};
+    struct HowToContent
+    {
+        const wchar_t* title;
+        const wchar_t* paragraph1;
+        const wchar_t* paragraph2;
+        const wchar_t* paragraph3;
+        const wchar_t* paragraph4;
+    };
 
     HFONT m_textFont = nullptr;
 	HFONT m_headerFont = nullptr;
@@ -331,6 +357,86 @@ private:
         y += 40;
         rect = { left, y, right, y + 25 };
     }
+    HowToContent m_howToContent[6] =
+    {
+        {},
+        {
+            L"GROWTH",
+            L"At the beginning of your turn, you receive ants based on the territory "
+            L"you control. You can place them on any of your cells, and you can divide "
+            L"them between cells.",
+            L"Consider which cells are most important to you. Cells near an opponent "
+            L"may need extra strength, while a cell you plan to use for an attack or "
+            L"movement may benefit from additional ants.",
+            L"You do not have to place all of your growth in one cell. Look at the "
+            L"board, consider what may happen next, and strengthen the positions that "
+            L"matter to you most.", L""
+        },
+        {
+            L"ATTACK",
+        L"Attacking gives you a chance to capture territory from an opponent. "
+        L"Before attacking, consider what the attack will accomplish and whether "
+        L"the target is worth the ants you commit.",
+
+        L"You can choose how many ants to send into an attack. You do not have to "
+        L"commit every available ant, so consider how much strength you want to "
+        L"leave behind.",
+
+        L"A successful attack captures the target cell and can change the shape "
+        L"of the board in your favor. A failed attack costs the ants you committed.",
+
+        L"Look at the board, consider what you want to accomplish, and choose your "
+        L"attacks carefully."
+        },
+        {
+            L"MOVE",
+        L"Moving lets you redistribute ants between your cells. You can move ants "
+        L"from one of your cells to an adjacent cell that you also control.",
+
+        L"You can choose how many ants to move, so consider how much strength you "
+        L"want to leave in the source cell and how much you want to add to the "
+        L"destination.",
+
+        L"A move can prepare a cell for an attack, reinforce an important position, "
+        L"or simply put your ants where they are more useful. Be careful not to move "
+        L"ants so far from the action that they become difficult to use later.",
+
+        L"Look at the board, consider what you want to accomplish, and move your "
+        L"ants with a purpose."
+        },
+        {
+            L"DEFENSE",
+        L"Defense is about recognizing threats before they become problems. Pay "
+        L"attention to where opponents are building strength and which of your "
+        L"cells may become vulnerable.",
+
+        L"Consider the importance of each position, the strength of nearby opponents, "
+        L"and how easily you can reinforce a cell if it comes under pressure.",
+
+        L"Not every threat requires a response. The board can change quickly, so "
+        L"consider what is at risk and what you may need to protect.",
+
+        L"Good defense is not simply keeping ants safe. It is keeping your territory "
+        L"in a position where you can respond to what happens next."
+        },
+        {
+            L"STRATEGY",
+        L"There is no single way to play Antz. Some players prefer an aggressive "
+        L"style, looking for opportunities to expand and attack. Others prefer a "
+        L"defensive style, concentrating on protecting their territory and responding "
+        L"to threats. A balanced style combines elements of both.",
+
+        L"Your own style may develop over time. You may find that you naturally favor "
+        L"one approach, or that your style changes as the game develops.",
+
+        L"Whatever your style, pay attention to the board, consider what your opponents "
+        L"are trying to accomplish, and think about how your choices affect what you "
+        L"can do next.",
+
+        L"The best strategy is the one that fits the way you want to play."
+        }
+    };
+
 
     void HowTo(HDC hdc)
     {
@@ -341,23 +447,7 @@ private:
         RECT titleRect = { 0, 115, gWidth, 150 };
         DrawText(hdc, L"HOW TO", -1, &titleRect, DT_CENTER | DT_SINGLELINE);
         // Content
-        enum HowToPage
-        {
-            H_Menu,
-            H_Growth,
-            H_Attack,
-            H_Move,
-            H_Defense,
-            H_Strategy
-        };
-        const wchar_t* menuItems[5] =
-        {
-            L"Growth",
-            L"Attack",
-            L"Move",
-            L"Defense",
-            L"Strategy"
-        };
+
         int menuWidth = 10 * TextSize;
         int rowHeight = 35;
         int menuHeight = 5 * rowHeight;
@@ -388,6 +478,48 @@ private:
         SelectObject(hdc, oldFont);
 	}
 
+    void HowTopage(HDC hdc)
+    {
+        const HowToContent& content = m_howToContent[m_howToPage];
+
+        SetBkMode(hdc, TRANSPARENT);
+
+        HFONT oldFont = (HFONT)SelectObject(hdc, m_textFont);
+
+        SetTextColor(hdc, RGB(255, 255, 255));
+
+        // Page title
+        SelectObject(hdc, m_headerFont);
+        RECT titleRect = { 0, 115, gWidth, 150 };
+        DrawText(hdc, content.title, -1, &titleRect, DT_CENTER | DT_SINGLELINE);
+
+        // Content
+        const int left = 250;
+        const int right = gWidth - 250;
+
+        int y = 250;
+
+        SelectObject(hdc, m_bodyFont);
+        RECT rect = { left, y, right, y + 80 };
+        DrawText(hdc, content.paragraph1, -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 100;
+
+        rect = { left, y, right, y + 100 };
+        DrawText(hdc, content.paragraph2, -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 100;
+
+        rect = { left, y, right, y + 100 };
+        DrawText(hdc, content.paragraph3, -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        y += 100;
+
+        rect = { left, y, right, y + 100 };
+        DrawText(hdc, content.paragraph4, -1, &rect, DT_LEFT | DT_WORDBREAK);
+
+        SelectObject(hdc, oldFont);
+   }
 
     void RenderBackground(HDC hdc)
     {
@@ -455,7 +587,14 @@ public:
         }
         else if (m_page == A_HowTo)
         {
-            HowTo(hdc);
+            if (m_howToPage != H_Menu)
+            {
+                HowTopage(hdc);
+            }
+            else
+            {
+                HowTo(hdc);
+            }
         }
         else
         {
@@ -548,6 +687,33 @@ public:
             int x = LOWORD(lParam);
             int y = HIWORD(lParam);
 
+            if (m_page == A_HowTo && m_howToPage != H_Menu)
+            {
+                m_howToPage = H_Menu;
+                m_selectedItem = -1;
+                m_hoverItem = -1;
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+                return true;
+            }
+
+            if (m_page == A_HowTo)
+            {
+                for (int i = 0; i < 5; ++i)
+                {
+                    if (PtInRect(&m_howToRects[i], POINT{ x, y }))
+                    {
+                        m_howToPage = static_cast<HowToPage>(i + 1);
+                        InvalidateRect(m_hWnd, nullptr, FALSE);
+                        return true;
+                    }
+                }
+                m_page = A_Menu;
+                m_selectedItem = -1;
+                m_hoverItem = -1;
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+                return true;
+            }
+
             for (int i = 0; i < 6; ++i)
             {
                 if (PtInRect(&m_menuRects[i], POINT{ x, y }))
@@ -562,7 +728,6 @@ public:
                     return true;
                 }
             }
-
             m_visible = false;
             InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;
@@ -585,14 +750,23 @@ public:
 
         if (wParam == VK_ESCAPE)
         {
+            if (m_page == A_HowTo && m_howToPage != H_Menu)
+            {
+                m_howToPage = H_Menu;
+                m_selectedItem = -1;
+                m_hoverItem = -1;
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+                return true;
+            }
+
             if (m_page != A_Menu)
             {
                 m_page = A_Menu;
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+                return true;
             }
-            else
-            {
-                m_visible = false;
-            }
+
+            m_visible = false;
 
             InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;

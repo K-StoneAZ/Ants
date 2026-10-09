@@ -616,7 +616,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
         case GAME_TIMER:
             KillTimer(hWnd, GAME_TIMER);
-            gGame.UpdateTurn();
+            if (gAbout.IsGamePage())
+            {
+                gAbout.Update();
+                SetTimer(hWnd, GAME_TIMER, 1000, nullptr);
+            }
+            else
+            {
+                gGame.UpdateTurn();
+            }
             InvalidateRect(hWnd, nullptr, FALSE);
             break;
         case ATTACK_TIMER:

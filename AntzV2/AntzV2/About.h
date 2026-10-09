@@ -1,5 +1,6 @@
 #pragma once
 #include "framework.h"
+#include "AboutGame.h"
 
 extern HBITMAP gSetupBackgroundBmp;
 extern int gWidth;
@@ -60,6 +61,8 @@ private:
         const wchar_t* paragraph4;
     };
 
+    AboutGame m_aboutGame;
+    bool m_gameInit = false;
     HFONT m_textFont = nullptr;
 	HFONT m_headerFont = nullptr;
 	HFONT m_bodyFont = nullptr;
@@ -604,6 +607,30 @@ public:
         return m_visible;
     }
 
+    bool IsGamePage() const
+    {
+        return m_visible && m_page == A_Game;
+    }
+
+    void Update()
+    {
+        if (IsGamePage())
+        {
+            m_aboutGame.Update();
+        }
+    }
+
+    void StartAbout()
+    {
+        m_aboutGame.Start();
+    }
+
+    void StopAbout()
+    {
+        m_aboutGame.Stop();
+    }
+
+
     void Paint(HDC hdc)
     {
         RenderBackground(hdc);
@@ -634,6 +661,16 @@ public:
             {
                 HowTo(hdc);
             }
+        }
+        else if (m_page == A_Game)
+        {
+            if (!m_gameInit)
+            {
+                m_aboutGame.Initialize(hdc);
+                m_gameInit = true;
+            }
+
+            m_aboutGame.Render();
         }
         else if (m_page == A_Credits)
         {
@@ -679,6 +716,10 @@ public:
             }
             else if (message == WM_LBUTTONDOWN)
             {
+                if (m_page == A_Game)
+                {
+                    StopAbout();
+                }
                 m_page = A_Menu;
                 InvalidateRect(m_hWnd, nullptr, FALSE);
                 return true;
@@ -761,7 +802,15 @@ public:
             {
                 if (PtInRect(&m_menuRects[i], POINT{ x, y }))
                 {
+                    if (m_page == A_Game)
+                    {
+                        StopAbout();
+                    }
                     m_page = static_cast<AboutPage>(i + 1);
+                    if (m_page == A_Game)
+                    {
+                        StartAbout();
+                    }
                     if (m_page == A_HowTo)
                     {
                         m_selectedItem = -1;
@@ -770,6 +819,10 @@ public:
                     InvalidateRect(m_hWnd, nullptr, FALSE);
                     return true;
                 }
+            }
+            if (m_page == A_Game)
+            {
+                StopAbout();
             }
             m_visible = false;
             InvalidateRect(m_hWnd, nullptr, FALSE);
@@ -804,6 +857,10 @@ public:
 
             if (m_page != A_Menu)
             {
+                if (m_page == A_Game)
+                {
+                    StopAbout();
+                }
                 m_page = A_Menu;
                 InvalidateRect(m_hWnd, nullptr, FALSE);
                 return true;

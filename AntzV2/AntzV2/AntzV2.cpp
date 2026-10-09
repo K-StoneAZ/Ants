@@ -17,6 +17,7 @@
 constexpr UINT GAME_TIMER = 1;
 constexpr UINT ATTACK_TIMER = 2;
 constexpr UINT AI_TIMER = 3;
+constexpr UINT ABOUT_TIMER = 4;
 
 int x = 100;
 int y = 80;
@@ -117,6 +118,15 @@ void StartGameTimer()
 void StopGameTimer()
 {
     KillTimer(gHwnd, GAME_TIMER);
+}
+void StartAboutTimer()
+{
+    SetTimer(gHwnd, ABOUT_TIMER, 1000, nullptr);
+}
+
+void StopAboutTimer()
+{
+    KillTimer(gHwnd, ABOUT_TIMER);
 }
 void StartTimer(Timer timer, GameSpeed speed)
 {
@@ -616,17 +626,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
         case GAME_TIMER:
             KillTimer(hWnd, GAME_TIMER);
-            if (gAbout.IsGamePage())
-            {
-                gAbout.Update();
-                SetTimer(hWnd, GAME_TIMER, 1000, nullptr);
-            }
-            else
-            {
-                gGame.UpdateTurn();
-            }
+            gGame.UpdateTurn();
             InvalidateRect(hWnd, nullptr, FALSE);
             break;
+
+        case ABOUT_TIMER:
+            gAbout.Update();
+            InvalidateRect(hWnd, nullptr, FALSE);
+            break;
+
         case ATTACK_TIMER:
             gGame.UpdateAttack();
             InvalidateRect(hWnd, nullptr, FALSE);

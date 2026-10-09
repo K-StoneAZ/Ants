@@ -5,6 +5,8 @@
 extern HBITMAP gSetupBackgroundBmp;
 extern int gWidth;
 extern int gHeight;
+void StartAboutTimer();
+void StopAboutTimer();
 
 
 class About
@@ -623,11 +625,13 @@ public:
     void StartAbout()
     {
         m_aboutGame.Start();
+        StartAboutTimer();
     }
 
     void StopAbout()
     {
         m_aboutGame.Stop();
+        StopAboutTimer();
     }
 
 

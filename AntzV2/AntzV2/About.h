@@ -69,6 +69,7 @@ private:
     int m_selectedItem = -1;
 	int m_hoverItem = -1;
     bool m_visible = false;
+    const COLORREF BODY_TEXT_COLOR = RGB(230, 210, 135);
 
     void DefineMenuRects()
     {
@@ -500,6 +501,7 @@ private:
         int y = 250;
 
         SelectObject(hdc, m_bodyFont);
+        SetTextColor(hdc, BODY_TEXT_COLOR);
         RECT rect = { left, y, right, y + 80 };
         DrawText(hdc, content.paragraph1, -1, &rect, DT_LEFT | DT_WORDBREAK);
 
@@ -520,6 +522,43 @@ private:
 
         SelectObject(hdc, oldFont);
    }
+
+    void Credits(HDC hdc)
+    {
+        SetBkMode(hdc, TRANSPARENT);
+
+        HFONT oldFont = (HFONT)SelectObject(hdc, m_textFont);
+
+        SetTextColor(hdc, RGB(255, 255, 255));
+
+        // Page title
+
+        RECT titleRect = { 0, 115, gWidth, 150 };
+        DrawText(hdc, L"Credits", -1, &titleRect, DT_CENTER | DT_SINGLELINE);
+
+        // Credits
+        SelectObject(hdc, m_headerFont);
+        SetTextColor(hdc, BODY_TEXT_COLOR);
+
+        RECT rect = { 350, 350, gWidth - 350, 600 };
+
+        DrawText(
+            hdc,
+            L"Inspired by the 1990's Flash game Ants and the Board Game 'Risk', "
+            L"with the goal of creating a simple, approachable game "
+            L"of territory, growth, and strategy.\n\n"
+            L"Created by\n"
+            L"Kelly\n\n"
+            L"AI assistance by\n"
+            L"OpenAI",
+            -1,
+            &rect,
+            DT_CENTER | DT_WORDBREAK
+        );
+
+        SelectObject(hdc, oldFont);
+    }
+
 
     void RenderBackground(HDC hdc)
     {
@@ -595,6 +634,10 @@ public:
             {
                 HowTo(hdc);
             }
+        }
+        else if (m_page == A_Credits)
+        {
+            Credits(hdc);
         }
         else
         {

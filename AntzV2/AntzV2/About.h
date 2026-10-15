@@ -895,6 +895,10 @@ public:
 
         case VK_RETURN:
             m_page = static_cast<AboutPage>(m_selectedItem + 1);
+            if (m_page == A_Game)
+            {
+                StartAbout();
+            }
             InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;
         

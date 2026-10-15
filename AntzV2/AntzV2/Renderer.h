@@ -994,6 +994,47 @@ public:
             &textRect, DT_CENTER | DT_WORDBREAK);
     }
 
+    void RenderMouse(const POINT* trail, int count, bool visible, int tap)
+    {
+        if (!visible)
+        {
+            return;
+        }
+
+        for (int i = count - 1; i >= 0; --i)
+        {
+            int x = trail[i].x;
+            int y = trail[i].y;
+            int size = (i == 0) ? 22 : 18 - (i * 2);
+
+            POINT arrow[7] =
+            {
+                { x, y },
+                { x, y + size },
+                { x + size / 4, y + size * 3 / 4 },
+                { x + size / 2, y + size + size / 3 },
+                { x + size * 3 / 4, y + size + size / 4 },
+                { x + size / 2, y + size * 2 / 3 },
+                { x + size, y + size * 2 / 3 }
+            };
+
+            HPEN outline = CreatePen(PS_SOLID, 3, RGB(20, 20, 20));
+            HBRUSH fill = CreateSolidBrush(
+                i == 0 ? RGB(255, 230, 40) : RGB(255, 255, 255));
+
+            HPEN oldPen = (HPEN)SelectObject(m_hdc, outline);
+            HBRUSH oldBrush = (HBRUSH)SelectObject(m_hdc, fill);
+
+            Polygon(m_hdc, arrow, 7);
+
+            SelectObject(m_hdc, oldPen);
+            SelectObject(m_hdc, oldBrush);
+
+            DeleteObject(outline);
+            DeleteObject(fill);
+        }
+    }
+
 //Getters for field layout
     RECT GetField() const { return m_fieldRect; }
     RECT GetStatus() const { return m_statusRect; }

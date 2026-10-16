@@ -121,7 +121,7 @@ void StopGameTimer()
 }
 void StartAboutTimer()
 {
-    SetTimer(gHwnd, ABOUT_TIMER, 1000, nullptr);
+    SetTimer(gHwnd, ABOUT_TIMER, 500, nullptr);
 }
 
 void StopAboutTimer()

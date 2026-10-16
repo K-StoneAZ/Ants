@@ -105,9 +105,14 @@ private:
 				m_mousePos.x != m_mouseTarget.x ||
 				m_mousePos.y != m_mouseTarget.y;
 		}
-		else if (m_mouseTap < 3)
+		else
 		{
-			++m_mouseTap;
+			m_mouseMoving = false;
+
+			if (m_mouseTap < 3)
+			{
+				++m_mouseTap;
+			}
 		}
 	}
 

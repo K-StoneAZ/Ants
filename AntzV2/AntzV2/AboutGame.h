@@ -33,7 +33,7 @@ private:
 	int m_dialogWidth = 500;
 	int m_dialogHeight = 120;
 	int m_dialogOffsetX = 0;
-	int m_dialogOffsetY = 0;
+	int m_dialogOffsetY = 35;
 	int m_dialogIndex = 0;
 	int m_scriptStep = 0;
 
@@ -44,15 +44,17 @@ private:
 		int col;
 	};
 
-	const ScriptStep m_script[2] =
+	const ScriptStep m_script[3] =
 	{
 		{ 0, -1, -1 },  // Introduction: no cursor target
-		{ 1,  2,  2 }   // Growth: move to field cell (2, 2)
+		{ 1,  2,  2 },   // Growth: move to field cell (2, 2)
+		{ 1,  9,  4 }//,   // Red's cell
+		//{ 1,  5,  5 }    // Additional step
 	};
 
 	void AdvanceScript()
 	{
-		if (m_scriptStep + 1 >= 2)
+		if (m_scriptStep + 1 >= 3)
 		{
 			return;
 		}
@@ -64,6 +66,7 @@ private:
 		m_showDialog = false;
 
 		m_dialogIndex = step.dialogIndex;
+		m_field.SetPlayerVisualMode(1);
 
 		if (step.row >= 0 && step.col >= 0)
 		{
@@ -298,37 +301,16 @@ public:
 			return;
 		}
 
-		// The script now owns mouse movement.
-		if (m_scriptStep > 0)
+		// Growth demonstration completes after the mouse finishes moving and tapping.
+		if (m_scriptStep >= 1)
 		{
+			if (!m_mouseMoving && m_mouseTap >= 3)
+			{
+				m_showDialog = true;
+			}
+
 			return;
 		}
-
-		if (!m_mouseVisible)
-		{
-			SetMouseTarget(
-				m_testMouseData[0].row,
-				m_testMouseData[0].col);
-
-			m_testMouseIndex = 1;
-			return;
-		}
-
-		if (m_mouseMoving || m_mouseTap < 3)
-		{
-			return;
-		}
-
-		if (m_testMouseIndex >= 5)
-		{
-			return;
-		}
-
-		SetMouseTarget(
-			m_testMouseData[m_testMouseIndex].row,
-			m_testMouseData[m_testMouseIndex].col);
-
-		++m_testMouseIndex;
 	}
 
 	bool HandleMouse(UINT message, LPARAM lParam)
@@ -340,15 +322,14 @@ public:
 			static_cast<short>(HIWORD(lParam))
 		};
 
-		if (m_showIntro)
+		if (m_showDialog && PtInRect(&m_nextRect, point))
 		{
-			if (PtInRect(&m_nextRect, point))
+			if (m_scriptStep + 1 < 3)
 			{
 				AdvanceScript();
-
-				return true;
 			}
 
+			return true;
 		}
 
 		return false;
@@ -361,7 +342,7 @@ public:
 		m_renderer.RenderMouse( m_mouseTrail, MOUSE_TRAIL_COUNT,
 				m_mouseVisible, m_mouseTap);
 		RenderNextButton();
-		if (m_showIntro)
+		if (m_showDialog)
 		{
 			RenderDialog();
 		}

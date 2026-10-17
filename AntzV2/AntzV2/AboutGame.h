@@ -34,6 +34,39 @@ private:
 	int m_dialogOffsetX = 0;
 	int m_dialogOffsetY = 0;
 	int m_dialogIndex = 0;
+	int m_scriptStep = 0;
+
+	struct ScriptStep
+	{
+		int dialogIndex;
+		int row;
+		int col;
+	};
+
+	const ScriptStep m_script[2] =
+	{
+		{ 0, -1, -1 },  // Introduction: no cursor target
+		{ 1,  2,  2 }   // Growth: move to field cell (2, 2)
+	};
+
+	void AdvanceScript()
+	{
+		if (m_scriptStep + 1 >= 2)
+		{
+			return;
+		}
+
+		++m_scriptStep;
+
+		const ScriptStep& step = m_script[m_scriptStep];
+
+		m_dialogIndex = step.dialogIndex;
+
+		if (step.row >= 0 && step.col >= 0)
+		{
+			SetMouseTarget(step.row, step.col);
+		}
+	}
 
 	struct DialogData
 	{
@@ -250,12 +283,17 @@ public:
 
 	void Update()
 	{
-		if (!m_isRunning || m_showIntro)
+		if (!m_isRunning)
 		{
 			return;
 		}
 
 		Mouse();
+
+		if (m_showIntro)
+		{
+			return;
+		}
 
 		if (!m_mouseVisible)
 		{
@@ -297,8 +335,7 @@ public:
 		{
 			if (PtInRect(&m_nextRect, point))
 			{
-				if (m_dialogIndex + 1 < static_cast<int>(m_DialogData.size()))
-					++m_dialogIndex;
+				AdvanceScript();
 
 				return true;
 			}

@@ -712,6 +712,11 @@ public:
         {
             return false;
         }
+        if (m_page == A_Game && m_aboutGame.HandleMouse(message, lParam))
+        {
+            InvalidateRect(m_hWnd, nullptr, FALSE);
+            return true;
+        }
         if (m_page != A_Menu)
         {
             if (m_page == A_HowTo)

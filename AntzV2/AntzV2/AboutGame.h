@@ -17,6 +17,11 @@ private:
 	GameSpeed m_gameSpeed = GameSpeed::Normal;
 	int m_activePlayer = 1;
 
+	HDC m_hdc = nullptr;
+	bool m_showIntro = true;
+	RECT m_beginRect = {};
+	RECT m_nextRect = {};
+
 	static constexpr int MOUSE_TRAIL_COUNT = 4;
 	POINT m_mousePos = { 100, 100 };
 	POINT m_mouseTarget = { 100, 100 };
@@ -24,6 +29,33 @@ private:
 	bool m_mouseVisible = false;
 	bool m_mouseMoving = false;
 	int m_mouseTap = 0;
+	int m_dialogWidth = 500;
+	int m_dialogHeight = 120;
+	int m_dialogOffsetX = 0;
+	int m_dialogOffsetY = 0;
+	int m_dialogIndex = 0;
+
+	struct DialogData
+	{
+		std::vector<const wchar_t*> text;
+	};
+	std::vector<DialogData> m_DialogData =
+	{
+		{
+			{
+				L"Red is Player 1 and is a human player.", L"Blue is the opponent.",
+				L"The cursor will demonstrate Red's actions."
+			}
+		},
+		{
+			{
+				L"During Red's turn, the player must distribute all available ants.",
+				L"Choose cells based on opponent's position and the player's",
+				L"personal strategy."
+			}
+		}
+
+	};
 
 	struct TestMouseData
 	{
@@ -42,6 +74,25 @@ private:
 
 	int m_testMouseIndex = 0;
 	int m_testMousePause = 0;
+
+
+	void RenderNextButton()
+	{
+		m_nextRect = { 935, 625, 1060, 670 };
+
+		HBRUSH brush = CreateSolidBrush(RGB(60, 60, 60));
+		FillRect(m_hdc, &m_nextRect, brush);
+		DeleteObject(brush);
+
+		FrameRect(m_hdc, &m_nextRect,
+			static_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
+
+		SetBkMode(m_hdc, TRANSPARENT);
+		SetTextColor(m_hdc, RGB(255, 255, 255));
+
+		DrawTextW(m_hdc, L"Next", -1, &m_nextRect,
+			DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	}
 
 	void SetMouseTarget(int row, int col)
 	{
@@ -117,10 +168,53 @@ private:
 	}
 
 
+	void RenderDialog()
+	{
+		if (m_DialogData.empty()) return;
+
+		RECT dialogRect = {};
+		dialogRect.left = m_mousePos.x + m_dialogOffsetX;
+		dialogRect.top = m_mousePos.y + m_dialogOffsetY;
+		dialogRect.right = dialogRect.left + m_dialogWidth;
+		dialogRect.bottom = dialogRect.top + m_dialogHeight;
+
+		HBRUSH brush = CreateSolidBrush(RGB(35, 35, 35));
+		FillRect(m_hdc, &dialogRect, brush);
+		DeleteObject(brush);
+
+		HPEN pen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
+		HGDIOBJ oldPen = SelectObject(m_hdc, pen);
+		HGDIOBJ oldBrush = SelectObject(
+			m_hdc, GetStockObject(HOLLOW_BRUSH));
+
+		Rectangle(m_hdc, dialogRect.left, dialogRect.top,
+			dialogRect.right, dialogRect.bottom);
+
+		SelectObject(m_hdc, oldBrush);
+		SelectObject(m_hdc, oldPen);
+		DeleteObject(pen);
+
+		SetBkMode(m_hdc, TRANSPARENT);
+		SetTextColor(m_hdc, RGB(230, 210, 135));
+
+		RECT textRect = dialogRect;
+		InflateRect(&textRect, -20, -20);
+
+		for (const wchar_t* line : m_DialogData[m_dialogIndex].text)
+		{
+			DrawTextW(m_hdc, line, -1, &textRect,
+				DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
+
+			textRect.top += 28;
+		}
+	}
+
+
 public:
 
 	bool Initialize(HDC hdc)
 	{
+		m_hdc = hdc;
 		m_renderer.Initialize(hdc);
 		GameConfig config;
 		config.m_DebugField = true;
@@ -154,10 +248,9 @@ public:
 		m_isRunning = false;
 	}
 
-
 	void Update()
 	{
-		if (!m_isRunning)
+		if (!m_isRunning || m_showIntro)
 		{
 			return;
 		}
@@ -191,12 +284,41 @@ public:
 		++m_testMouseIndex;
 	}
 
+	bool HandleMouse(UINT message, LPARAM lParam)
+	{
+		if (message != WM_LBUTTONDOWN) return false;
+
+		POINT point = {
+			static_cast<short>(LOWORD(lParam)),
+			static_cast<short>(HIWORD(lParam))
+		};
+
+		if (m_showIntro)
+		{
+			if (PtInRect(&m_nextRect, point))
+			{
+				if (m_dialogIndex + 1 < static_cast<int>(m_DialogData.size()))
+					++m_dialogIndex;
+
+				return true;
+			}
+
+		}
+
+		return false;
+	}
+
 	void Render() 
 	{
 		m_renderer.Render(m_field, m_players, m_dialog,
 			m_activePlayer, m_antBox, m_error, m_gameSpeed);
 		m_renderer.RenderMouse( m_mouseTrail, MOUSE_TRAIL_COUNT,
 				m_mouseVisible, m_mouseTap);
+		RenderNextButton();
+		if (m_showIntro)
+		{
+			RenderDialog();
+		}
 
 	}
 	bool IsRunning() const;

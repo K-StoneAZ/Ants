@@ -18,8 +18,8 @@ private:
 	int m_activePlayer = 1;
 
 	HDC m_hdc = nullptr;
-	bool m_showIntro = true;
 	bool m_showDialog = true;
+	bool m_nextRequested = false;
 	RECT m_beginRect = {};
 	RECT m_nextRect = {};
 
@@ -36,6 +36,19 @@ private:
 	int m_dialogOffsetY = 35;
 	int m_dialogIndex = 0;
 	int m_scriptStep = 0;
+
+	enum class WalkState
+	{
+		INTRO,
+		GROWTH,
+		ATTACK,
+		MOVE,
+		TURN_TRANSITION,
+		COMPLETE
+	};
+
+	WalkState m_state = WalkState::INTRO;
+	int m_stateStep = 0;
 
 	struct ScriptStep
 	{
@@ -287,6 +300,7 @@ public:
 		m_isRunning = false;
 	}
 
+
 	void Update()
 	{
 		if (!m_isRunning)
@@ -295,23 +309,47 @@ public:
 		}
 
 		Mouse();
-
-		if (m_showDialog)
+		if (m_nextRequested)
 		{
-			return;
+			m_nextRequested = false;
+
+			if (m_showDialog)
+			{
+				AdvanceScript();
+			}
 		}
 
-		// Growth demonstration completes after the mouse finishes moving and tapping.
-		if (m_scriptStep >= 1)
+		switch (m_state)
 		{
+		case WalkState::INTRO:
+			if (!m_showDialog)
+			{
+				m_state = WalkState::GROWTH;
+				m_stateStep = 0;
+			}
+			return;
+
+		case WalkState::GROWTH:
+			if (m_showDialog)
+			{
+				return;
+			}
+
 			if (!m_mouseMoving && m_mouseTap >= 3)
 			{
 				m_showDialog = true;
+				m_stateStep++;
 			}
+			return;
 
+		case WalkState::ATTACK:
+		case WalkState::MOVE:
+		case WalkState::TURN_TRANSITION:
+		case WalkState::COMPLETE:
 			return;
 		}
 	}
+
 
 	bool HandleMouse(UINT message, LPARAM lParam)
 	{
@@ -324,11 +362,7 @@ public:
 
 		if (m_showDialog && PtInRect(&m_nextRect, point))
 		{
-			if (m_scriptStep + 1 < 3)
-			{
-				AdvanceScript();
-			}
-
+			m_nextRequested = true;
 			return true;
 		}
 

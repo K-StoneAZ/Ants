@@ -19,6 +19,7 @@ private:
 
 	HDC m_hdc = nullptr;
 	bool m_showIntro = true;
+	bool m_showDialog = true;
 	RECT m_beginRect = {};
 	RECT m_nextRect = {};
 
@@ -59,6 +60,8 @@ private:
 		++m_scriptStep;
 
 		const ScriptStep& step = m_script[m_scriptStep];
+
+		m_showDialog = false;
 
 		m_dialogIndex = step.dialogIndex;
 
@@ -290,7 +293,13 @@ public:
 
 		Mouse();
 
-		if (m_showIntro)
+		if (m_showDialog)
+		{
+			return;
+		}
+
+		// The script now owns mouse movement.
+		if (m_scriptStep > 0)
 		{
 			return;
 		}

@@ -29,13 +29,26 @@ private:
 	POINT m_mouseTrail[MOUSE_TRAIL_COUNT] = {};
 	bool m_mouseVisible = false;
 	bool m_mouseMoving = false;
+	bool m_showAntOverlay = false;
 	int m_mouseTap = 0;
 	int m_dialogWidth = 500;
 	int m_dialogHeight = 120;
 	int m_dialogOffsetX = 0;
 	int m_dialogOffsetY = 35;
 	int m_dialogIndex = 0;
-	int m_scriptStep = 0;
+	int m_delayTicks = 0;
+
+	bool Delay(int ticks)
+	{
+		if (++m_delayTicks < ticks)
+		{
+			return false;
+		}
+
+		m_delayTicks = 0;
+		return true;
+	}
+
 
 	enum class WalkState
 	{
@@ -50,42 +63,28 @@ private:
 	WalkState m_state = WalkState::INTRO;
 	int m_stateStep = 0;
 
-	struct ScriptStep
-	{
-		int dialogIndex;
-		int row;
-		int col;
-	};
+	//void AdvanceScript()
+	//{
+	//	if (m_scriptStep + 1 >= 3)
+	//	{
+	//		return;
+	//	}
 
-	const ScriptStep m_script[3] =
-	{
-		{ 0, -1, -1 },  // Introduction: no cursor target
-		{ 1,  2,  2 },   // Growth: move to field cell (2, 2)
-		{ 1,  9,  4 }//,   // Red's cell
-		//{ 1,  5,  5 }    // Additional step
-	};
+	//	++m_scriptStep;
 
-	void AdvanceScript()
-	{
-		if (m_scriptStep + 1 >= 3)
-		{
-			return;
-		}
+	//	const ScriptStep& step = m_script[m_scriptStep];
 
-		++m_scriptStep;
+	//	m_showDialog = false;
 
-		const ScriptStep& step = m_script[m_scriptStep];
+	//	m_dialogIndex = step.dialogIndex;
+	//	m_field.SetPlayerVisualMode(1);
 
-		m_showDialog = false;
+	//	if (step.row >= 0 && step.col >= 0)
+	//	{
+	//		SetMouseTarget(step.row, step.col);
+	//	}
 
-		m_dialogIndex = step.dialogIndex;
-		m_field.SetPlayerVisualMode(1);
-
-		if (step.row >= 0 && step.col >= 0)
-		{
-			SetMouseTarget(step.row, step.col);
-		}
-	}
+	//}
 
 	struct DialogData
 	{
@@ -103,30 +102,11 @@ private:
 			{
 				L"During Red's turn, the player must distribute all available ants.",
 				L"Choose cells based on opponent's position and the player's",
-				L"personal strategy."
+				L"personal strategy.  Select this cell and add all available ants"
 			}
 		}
 
 	};
-
-	struct TestMouseData
-	{
-		int row;
-		int col;
-	};
-
-	TestMouseData m_testMouseData[5] =
-	{
-		{ 2, 2 },
-		{ 2, 7 },
-		{ 7, 7 },
-		{ 7, 2 },
-		{ 4, 4 }
-	};
-
-	int m_testMouseIndex = 0;
-	int m_testMousePause = 0;
-
 
 	void RenderNextButton()
 	{
@@ -176,6 +156,27 @@ private:
 				return;
 			}
 		}
+	}
+
+	void SetMouseTarget(const RECT& rect)
+	{
+		m_mouseTarget.x = (rect.left + rect.right) / 2;
+		m_mouseTarget.y = (rect.top + rect.bottom) / 2;
+
+		if (!m_mouseVisible)
+		{
+			m_mousePos = m_mouseTarget;
+
+			for (int i = 0; i < MOUSE_TRAIL_COUNT; ++i)
+			{
+				m_mouseTrail[i] = m_mousePos;
+			}
+
+			m_mouseVisible = true;
+		}
+
+		m_mouseMoving = true;
+		m_mouseTap = 0;
 	}
 
 	void Mouse()
@@ -260,7 +261,32 @@ private:
 			textRect.top += 28;
 		}
 	}
+	void RenderAntOverlay(int ants)
+	{
+		RECT rect = m_renderer.GetAnt();
 
+		// Highlight the ant-entry box.
+		HPEN pen = CreatePen(PS_SOLID, 2, RGB(255, 230, 40));
+		HGDIOBJ oldPen = SelectObject(m_hdc, pen);
+		HGDIOBJ oldBrush =
+			SelectObject(m_hdc, GetStockObject(HOLLOW_BRUSH));
+
+		Rectangle(m_hdc, rect.left, rect.top,
+			rect.right, rect.bottom);
+
+		SelectObject(m_hdc, oldBrush);
+		SelectObject(m_hdc, oldPen);
+		DeleteObject(pen);
+
+		// Display the scripted ant count.
+		SetBkMode(m_hdc, TRANSPARENT);
+		SetTextColor(m_hdc, RGB(0, 0, 0));
+
+		std::string text = std::to_string(ants);
+
+		DrawTextA(m_hdc, text.c_str(), -1, &rect,
+			DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	}
 
 public:
 
@@ -315,7 +341,7 @@ public:
 
 			if (m_showDialog)
 			{
-				AdvanceScript();
+				m_showDialog = false;
 			}
 		}
 
@@ -330,15 +356,77 @@ public:
 			return;
 
 		case WalkState::GROWTH:
-			if (m_showDialog)
+			if (m_stateStep == 0)
 			{
+				m_players[1].sant =
+					1 + m_players[1].m_cells_owned / 3;
+				m_players[1].tant = 0;
+				m_players[1].selectS = true;
+				m_players[1].selectT = false;
+
+				m_field.SetPlayerVisualMode(1);
+				SetMouseTarget(2, 2);
+				m_stateStep = 1;
 				return;
 			}
 
-			if (!m_mouseMoving && m_mouseTap >= 3)
+			if (m_stateStep == 1)
 			{
-				m_showDialog = true;
-				m_stateStep++;
+				if (!m_mouseMoving && m_mouseTap >= 3)
+				{
+					SetMouseTarget(9, 4);
+					m_stateStep = 2;
+				}
+				return;
+			}
+
+			if (m_stateStep == 2)
+			{
+				if (!m_mouseMoving && m_mouseTap >= 3)
+				{
+
+					m_dialogIndex = 1;
+					m_showDialog = true;
+					m_stateStep = 3;
+				}
+				return;
+			}
+			if (m_stateStep == 3)
+			{
+				if (Delay(4))
+				{
+					m_field.SetVisualMode(9, 4, Field::V_GROWTH);
+					SetMouseTarget(m_renderer.GetAnt());
+					m_stateStep = 4;
+				}
+				return;
+			}
+			if (m_stateStep == 4)
+			{
+				if (!m_mouseMoving && m_mouseTap >= 3)
+				{
+					m_showAntOverlay = true;
+					m_stateStep = 5;
+				}
+				return;
+			}
+			if (m_stateStep == 5)
+			{
+
+				if (m_nextRequested)
+				{
+					m_nextRequested = false;
+
+					m_players[m_activePlayer].tant =
+						m_players[m_activePlayer].sant;
+
+					m_players[m_activePlayer].selectS = true;
+					m_players[m_activePlayer].selectT = true;
+
+					m_showAntOverlay = false;
+					m_stateStep = 6;
+				}
+				return;
 			}
 			return;
 
@@ -373,6 +461,10 @@ public:
 	{
 		m_renderer.Render(m_field, m_players, m_dialog,
 			m_activePlayer, m_antBox, m_error, m_gameSpeed);
+		if (m_showAntOverlay)
+		{
+			RenderAntOverlay(m_players[m_activePlayer].sant);
+		}
 		m_renderer.RenderMouse( m_mouseTrail, MOUSE_TRAIL_COUNT,
 				m_mouseVisible, m_mouseTap);
 		RenderNextButton();

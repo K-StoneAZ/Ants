@@ -104,8 +104,13 @@ private:
 				L"Choose cells based on opponent's position and the player's",
 				L"personal strategy.  Select this cell and add all available ants"
 			}
+		},
+		{
+			{
+				L"Click Confirm to add ants to the selected cell",
+				L"Click Cancel to choose a different cell",
+			}
 		}
-
 	};
 
 	void RenderNextButton()
@@ -220,16 +225,21 @@ private:
 		}
 	}
 
+	RECT GetDialogRect() const
+	{
+		RECT rect = {};
+		rect.left = m_mousePos.x + m_dialogOffsetX;
+		rect.top = m_mousePos.y + m_dialogOffsetY;
+		rect.right = rect.left + m_dialogWidth;
+		rect.bottom = rect.top + m_dialogHeight;
 
+		return rect;
+	}
 	void RenderDialog()
 	{
 		if (m_DialogData.empty()) return;
 
-		RECT dialogRect = {};
-		dialogRect.left = m_mousePos.x + m_dialogOffsetX;
-		dialogRect.top = m_mousePos.y + m_dialogOffsetY;
-		dialogRect.right = dialogRect.left + m_dialogWidth;
-		dialogRect.bottom = dialogRect.top + m_dialogHeight;
+		RECT dialogRect = GetDialogRect();
 
 		HBRUSH brush = CreateSolidBrush(RGB(35, 35, 35));
 		FillRect(m_hdc, &dialogRect, brush);
@@ -335,6 +345,8 @@ public:
 		}
 
 		Mouse();
+		bool Next = m_nextRequested;
+
 		if (m_nextRequested)
 		{
 			m_nextRequested = false;
@@ -393,7 +405,7 @@ public:
 			}
 			if (m_stateStep == 3)
 			{
-				if (Delay(4))
+				if (!m_showDialog && Delay(6))
 				{
 					m_field.SetVisualMode(9, 4, Field::V_GROWTH);
 					SetMouseTarget(m_renderer.GetAnt());
@@ -413,10 +425,8 @@ public:
 			if (m_stateStep == 5)
 			{
 
-				if (m_nextRequested)
+				if (Next)
 				{
-					m_nextRequested = false;
-
 					m_players[m_activePlayer].tant =
 						m_players[m_activePlayer].sant;
 
@@ -426,6 +436,15 @@ public:
 					m_showAntOverlay = false;
 					m_stateStep = 6;
 				}
+				return;
+			}
+			if (m_stateStep == 6)
+			{
+				m_renderer.RenderHUD(
+					m_players, m_dialog, m_activePlayer, m_gameSpeed);
+				SetMouseTarget(m_renderer.GetConfirm());
+				m_showAntOverlay = false;
+				m_stateStep = 7;
 				return;
 			}
 			return;
@@ -448,7 +467,7 @@ public:
 			static_cast<short>(HIWORD(lParam))
 		};
 
-		if (m_showDialog && PtInRect(&m_nextRect, point))
+		if (PtInRect(&m_nextRect, point))
 		{
 			m_nextRequested = true;
 			return true;

@@ -663,7 +663,7 @@ public:
 
 					// Commit the selected number of ants.
 					PlayerData& player = m_players[m_activePlayer];
-
+					player.tant = m_overlayAnts;
 					m_field.setAnts(
 						player.srow,
 						player.scol,

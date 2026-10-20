@@ -39,6 +39,7 @@ private:
 	int m_dialogOffsetY = 35;
 	int m_dialogIndex = 0;
 	int m_delayTicks = 0;
+	int m_overlayAnts = 0;
 
 	bool Delay(int ticks)
 	{
@@ -472,6 +473,7 @@ public:
 			{
 				if (!m_mouseMoving && m_mouseTap >= 3)
 				{
+					m_overlayAnts = m_players[m_activePlayer].sant;
 					m_showAntOverlay = true;
 					m_stateStep = 5;
 				}
@@ -639,17 +641,16 @@ public:
 					SetMouseTarget(m_renderer.GetAnt());
 					m_stateStep = 7;
 				}
-			}
 				return;
+			}
+
 			
 			if (m_stateStep == 7)
 			{
 				if (m_mouseMoving || m_mouseTap < 3)
 					return;
 
-				PlayerData& player = m_players[m_activePlayer];
-				player.tant = (m_field.getAnts(9, 4) - 1) / 2;
-
+				m_overlayAnts = 4;
 				m_showAntOverlay = true;
 				m_stateStep = 8;
 				return;
@@ -716,7 +717,7 @@ public:
 			m_activePlayer, m_antBox, m_error, m_gameSpeed);
 		if (m_showAntOverlay)
 		{
-			RenderAntOverlay(m_players[m_activePlayer].sant);
+			RenderAntOverlay(m_overlayAnts);
 		}
 		m_renderer.RenderMouse( m_mouseTrail, MOUSE_TRAIL_COUNT,
 				m_mouseVisible, m_mouseTap);

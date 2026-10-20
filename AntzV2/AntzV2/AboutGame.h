@@ -3,6 +3,8 @@
 #include "Renderer.h"
 #include "Field.h"
 #include "GameTypes.h"
+extern int gWidth;
+extern int gHeight;
 
 class AboutGame
 {
@@ -92,23 +94,44 @@ private:
 	};
 	std::vector<DialogData> m_DialogData =
 	{
-		{
+		{ //0
 			{
 				L"Red is Player 1 and is a human player.", L"Blue is the opponent.",
 				L"The cursor will demonstrate Red's actions."
 			}
 		},
-		{
+		{ //1
 			{
 				L"During Red's turn, the player must distribute all available ants.",
 				L"Choose cells based on opponent's position and the player's",
 				L"personal strategy.  Select this cell and add all available ants"
 			}
 		},
-		{
+		{ //2
 			{
-				L"Click Confirm to add ants to the selected cell",
-				L"Click Cancel to choose a different cell",
+				L"Click OK to add ants to the selected cell",
+				L"Click Cancel to choose a different cell"
+			}
+		},
+		{ //3
+			{
+				L"Red's Growth phase is complete.",
+				L"Red can now attack an adjacent enemy cell.",
+				L"Select a Red cell with ants available to attack."
+			}
+		},
+		{ //4
+			{
+				L"The highlighted cells are valid attack targets.",
+				L"Red can attack an adjacent cell that it does not own.",
+				L"Select the highlighted Blue cell to continue."
+			}
+		},
+		{ //5
+			{
+				L"Red can choose how many ants to commit to an attack.",
+				L"Red must leave at least one ant behind in the source cell.",
+				L"For this example, Red will commit half of the available ants.",
 			}
 		}
 	};
@@ -228,8 +251,40 @@ private:
 	RECT GetDialogRect() const
 	{
 		RECT rect = {};
+
 		rect.left = m_mousePos.x + m_dialogOffsetX;
 		rect.top = m_mousePos.y + m_dialogOffsetY;
+
+		// Move left if the dialog would exceed the right edge.
+		if (rect.left + m_dialogWidth > gWidth)
+		{
+			rect.left = m_mousePos.x - m_dialogWidth - 20;
+		}
+
+		// Move above if the dialog would exceed the bottom edge.
+		if (rect.top + m_dialogHeight > gHeight)
+		{
+			rect.top = m_mousePos.y - m_dialogHeight - 20;
+		}
+
+		// Keep the complete rectangle inside the rendering area.
+		if (rect.left < 0)
+		{
+			rect.left = 0;
+		}
+		if (rect.top < 0)
+		{
+			rect.top = 0;
+		}
+		if (rect.left + m_dialogWidth > gWidth)
+		{
+			rect.left = gWidth - m_dialogWidth;
+		}
+		if (rect.top + m_dialogHeight > gHeight)
+		{
+			rect.top = gHeight - m_dialogHeight;
+		}
+
 		rect.right = rect.left + m_dialogWidth;
 		rect.bottom = rect.top + m_dialogHeight;
 
@@ -447,13 +502,192 @@ public:
 				m_stateStep = 7;
 				return;
 			}
+			if (m_stateStep == 7)
+			{
+				if (!m_mouseMoving && m_mouseTap >= 3)
+				{
+					m_dialogIndex = 2;
+					m_showDialog = true;
+					m_stateStep = 8;
+				}
+				return;
+			}
+
+			if (m_stateStep == 8)
+			{
+				if (Next)
+				{
+					int row = 9;
+					int col = 4;
+					int ants = m_players[m_activePlayer].tant;
+
+					m_field.setAnts(row, col,
+						m_field.getAnts(row, col) + ants);
+
+					m_players[m_activePlayer].sant -= ants;
+					m_players[m_activePlayer].tant = 0;
+
+					m_field.ClearAllVisualModes();
+					m_stateStep = 0;
+					m_state = WalkState::ATTACK;
+				}
+				return;
+			}
 			return;
 
 		case WalkState::ATTACK:
+		
+			if (m_stateStep == 0)
+			{
+				m_dialog.m_mode = DIALOG_ATTACK;
+
+				m_field.SetPlayerVisualMode(m_activePlayer);
+				m_players[m_activePlayer].selectS = false;
+				m_players[m_activePlayer].selectT = false;
+
+				m_dialogIndex = 3;
+				m_showDialog = true;
+
+				m_stateStep = 1;
+				return;
+			}
+			if (m_stateStep == 1)
+			{
+				SetMouseTarget(9, 4);
+				m_stateStep = 2;
+				return;
+			}
+			if (m_stateStep == 2)
+			{
+				if (Next)
+				{
+					m_showDialog = false;
+
+					m_players[m_activePlayer].srow = 9;
+					m_players[m_activePlayer].scol = 4;
+					m_players[m_activePlayer].sant =
+						m_field.getAnts(9, 4) - 1;
+					m_players[m_activePlayer].selectS = true;
+					m_field.ClearAllVisualModes();
+					m_field.SetVisualMode(9, 4, Field::V_ATTACK_SOURCE);
+
+					m_stateStep = 3;
+				}
+				return;
+			}
+
+			if (m_stateStep == 3)
+			{
+				Field::Area area = m_field.getArea(9, 4);
+
+				for (int row = area.rmin; row <= area.rmax; row++)
+				{
+					for (int col = area.cmin; col <= area.cmax; col++)
+					{
+						if (row == 9 && col == 4)
+						{
+							continue;
+						}
+
+						if (m_field.getOwner(row, col) == m_activePlayer)
+						{
+							continue;
+						}
+
+						m_field.SetVisualMode(row, col, Field::V_HOVER);
+					}
+				}
+
+				SetMouseTarget(9, 3);
+				m_stateStep = 4;
+				return;
+			}
+			if (m_stateStep == 4)
+			{
+				if (m_mouseMoving || m_mouseTap < 3)
+					return;
+
+				m_dialogIndex = 4;
+				m_showDialog = true;
+				m_stateStep = 5;
+				return;
+			}
+			if (m_stateStep == 5)
+			{
+				if (Next)
+				{
+					m_showDialog = false;
+
+					m_players[m_activePlayer].trow = 9;
+					m_players[m_activePlayer].tcol = 3;
+					m_players[m_activePlayer].selectT = true;
+
+					m_field.ClearVisualModeType(Field::V_HOVER);
+					m_field.SetVisualMode(9, 3, Field::V_ATTACK_TARGET);
+
+					m_dialogIndex = 5;
+					m_showDialog = true;
+					m_stateStep = 6;
+				}
+				return;
+			}
+			if (m_stateStep == 6)
+			{
+				if (Next)
+				{
+					m_showDialog = false;
+					SetMouseTarget(m_renderer.GetAnt());
+					m_stateStep = 7;
+				}
+			}
+				return;
+			
+			if (m_stateStep == 7)
+			{
+				if (m_mouseMoving || m_mouseTap < 3)
+					return;
+
+				PlayerData& player = m_players[m_activePlayer];
+				player.tant = (m_field.getAnts(9, 4) - 1) / 2;
+
+				m_showAntOverlay = true;
+				m_stateStep = 8;
+				return;
+			}
+			if (m_stateStep == 8)
+			{
+				if (Next)
+				{
+					m_showAntOverlay = false;
+
+					// Commit the selected number of ants.
+					PlayerData& player = m_players[m_activePlayer];
+
+					m_field.setAnts(
+						player.srow,
+						player.scol,
+						m_field.getAnts(player.srow, player.scol) - player.tant);
+
+					player.sant = player.tant;
+					player.tplayerID = m_field.getOwner(player.trow, player.tcol);
+					player.tant = m_field.getAnts(player.trow, player.tcol);
+
+					player.selectS = false;
+					player.selectT = false;
+
+					m_stateStep = 9;
+				}
+				return;
+			}
+
+			return;
+		
+
 		case WalkState::MOVE:
 		case WalkState::TURN_TRANSITION:
 		case WalkState::COMPLETE:
 			return;
+
 		}
 	}
 

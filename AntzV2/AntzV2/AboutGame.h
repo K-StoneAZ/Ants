@@ -32,6 +32,7 @@ private:
 	bool m_mouseVisible = false;
 	bool m_mouseMoving = false;
 	bool m_showAntOverlay = false;
+	bool m_nextColors = false;
 	int m_mouseTap = 0;
 	int m_dialogWidth = 500;
 	int m_dialogHeight = 120;
@@ -65,29 +66,6 @@ private:
 
 	WalkState m_state = WalkState::INTRO;
 	int m_stateStep = 0;
-
-	//void AdvanceScript()
-	//{
-	//	if (m_scriptStep + 1 >= 3)
-	//	{
-	//		return;
-	//	}
-
-	//	++m_scriptStep;
-
-	//	const ScriptStep& step = m_script[m_scriptStep];
-
-	//	m_showDialog = false;
-
-	//	m_dialogIndex = step.dialogIndex;
-	//	m_field.SetPlayerVisualMode(1);
-
-	//	if (step.row >= 0 && step.col >= 0)
-	//	{
-	//		SetMouseTarget(step.row, step.col);
-	//	}
-
-	//}
 
 	struct DialogData
 	{
@@ -171,12 +149,17 @@ private:
 			}
 		},
 	};
+	void FlashNextButton()
+	{
+		m_nextColors = !m_nextColors;
+	}
 
 	void RenderNextButton()
 	{
 		m_nextRect = { 935, 625, 1060, 670 };
 
-		HBRUSH brush = CreateSolidBrush(RGB(60, 60, 60));
+		HBRUSH brush = CreateSolidBrush(
+			m_nextColors ? RGB(255, 255, 255) : RGB(60, 60, 60));
 		FillRect(m_hdc, &m_nextRect, brush);
 		DeleteObject(brush);
 
@@ -184,7 +167,8 @@ private:
 			static_cast<HBRUSH>(GetStockObject(WHITE_BRUSH)));
 
 		SetBkMode(m_hdc, TRANSPARENT);
-		SetTextColor(m_hdc, RGB(255, 255, 255));
+		SetTextColor(m_hdc,
+			m_nextColors ? RGB(60, 60, 60) : RGB(255, 255, 255));
 
 		DrawTextW(m_hdc, L"Next", -1, &m_nextRect,
 			DT_CENTER | DT_VCENTER | DT_SINGLELINE);
@@ -446,6 +430,15 @@ public:
 			{
 				m_showDialog = false;
 			}
+		}
+		// Flash Next while the dialog is visible.
+		if (m_showDialog)
+		{
+			FlashNextButton();
+		}
+		else
+		{
+			m_nextColors = false;
 		}
 
 		switch (m_state)
@@ -895,6 +888,8 @@ public:
 				if (m_mouseMoving || m_mouseTap < 3)
 					return;
 
+				m_overlayAnts = 1;
+				m_showAntOverlay = true;
 				// Now explain the ant commitment.
 				m_dialogIndex = 9;
 				m_showDialog = true;

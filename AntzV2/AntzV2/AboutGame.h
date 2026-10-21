@@ -151,7 +151,7 @@ private:
 		},
 		{ //8
 			{
-				L"The highlighted cells with more than w ant are valid move sources.",
+				L"The highlighted cells with more than 1 ant are valid move sources.",
 				L"Red can move ants to an adjacent cell that it owns.",
 				L"Select the highlighted Red cell to continue."
 			}

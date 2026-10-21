@@ -134,7 +134,42 @@ private:
 				L"Red must leave at least one ant behind in the source cell.",
 				L"For this example, Red will commit half of the available ants.",
 			}
-		}
+		},
+		{ //6
+			{
+				L"The attack is ready.",
+				L"Click OK to confirm, Cancel to choose a different cell or",
+				L"Skip to go to Move stage."
+			}
+		},
+		{ //7
+			{
+				L"Red's First attack is successful.",
+				L"Red may attack again, or choose Skip to go",
+				L"to the move stage."
+			}
+		},
+		{ //8
+			{
+				L"The highlighted cells are valid move targets.",
+				L"Red can move ants to an adjacent cell that it owns.",
+				L"Select the highlighted Red cell to continue."
+			}
+		},
+		{ //9
+			{
+				L"Red can choose how many ants to commit to a move.",
+				L"Red must leave at least one ant behind in the source cell.",
+				L"For this example, Red will commit half of the available ants.",
+			}
+		},
+		{ //10
+			{
+				L"The move is ready.",
+				L"Click OK to confirm, Cancel to choose a different cell or",
+				L"Skip to end the turn."
+			}
+		},
 	};
 
 	void RenderNextButton()
@@ -399,7 +434,7 @@ public:
 		{
 			return;
 		}
-
+		PlayerData& player = m_players[m_activePlayer];
 		Mouse();
 		bool Next = m_nextRequested;
 
@@ -538,7 +573,8 @@ public:
 			return;
 
 		case WalkState::ATTACK:
-		
+		{
+
 			if (m_stateStep == 0)
 			{
 				m_dialog.m_mode = DIALOG_ATTACK;
@@ -644,7 +680,7 @@ public:
 				return;
 			}
 
-			
+
 			if (m_stateStep == 7)
 			{
 				if (m_mouseMoving || m_mouseTap < 3)
@@ -662,7 +698,7 @@ public:
 					m_showAntOverlay = false;
 
 					// Commit the selected number of ants.
-					PlayerData& player = m_players[m_activePlayer];
+
 					player.tant = m_overlayAnts;
 					m_field.setAnts(
 						player.srow,
@@ -680,15 +716,223 @@ public:
 				}
 				return;
 			}
+			if (m_stateStep == 9)
+			{
+				m_dialogIndex = 6;
+				m_showDialog = true;
+				m_stateStep = 10;
+				return;
+			}
+			if (m_stateStep == 10)
+			{
+				if (Next)
+				{
+					m_showDialog = false;
+					SetMouseTarget(m_renderer.GetConfirm());
+					m_stateStep = 11;
+				}
+				return;
+			}
+			// Simulate the battle.
+			if (m_stateStep == 11)
+			{
+				if (!m_mouseMoving && m_mouseTap >= 3)
+				{
+					m_renderer.SetBattleActive(true);
+					m_stateStep = 12;
+				}
+				return;
+			}
+			if (m_stateStep == 12)
+			{
+				player.attackRoll = 42;
+				player.defenseRoll = 67;
 
+				m_stateStep = 13;
+				return;
+			}
+			if (m_stateStep == 13)
+			{
+				player.sant--;
+
+				m_stateStep = 14;
+				return;
+			}
+			if (m_stateStep == 14)
+			{
+				player.attackRoll = 88;
+				player.defenseRoll = 12;
+				m_stateStep = 15;
+				return;
+			}
+			if (m_stateStep == 15)
+			{
+				player.tant--;
+				m_stateStep = 16;
+				return;
+			}
+			if (m_stateStep == 16)
+			{
+				m_field.setOwner(player.trow, player.tcol, m_activePlayer);
+				m_field.setAnts(player.trow, player.tcol, player.sant);
+				m_dialogIndex = 7;
+				m_showDialog = true;
+				m_stateStep = 17;
+				return;
+			}
+			if (m_stateStep == 17)
+			{
+				if (Next)
+				{
+					m_showDialog = false;
+					m_renderer.SetBattleActive(false);
+					m_field.ClearAllVisualModes();
+					m_stateStep = 0;
+					m_state = WalkState::MOVE;
+					return;
+				}
+			}
 			return;
-		
-
+		}
 		case WalkState::MOVE:
-		case WalkState::TURN_TRANSITION:
-		case WalkState::COMPLETE:
+		{
+			PlayerData& player = m_players[m_activePlayer];
+
+			if (m_stateStep == 0)
+			{
+				m_dialog.m_mode = DIALOG_MOVE;
+				m_field.SetPlayerVisualMode(m_activePlayer);
+
+				player.selectS = false;
+				player.selectT = false;
+
+				m_dialogIndex = 8;
+				m_showDialog = true;
+				m_stateStep = 1;
+				return;
+			}
+			if (m_stateStep == 1)
+			{
+				SetMouseTarget(9, 4);
+				m_stateStep = 2;
+				return;
+			}
+			if (m_stateStep == 2)
+			{
+				if (Next)
+				{
+					m_showDialog = false;
+
+					player.srow = 9;
+					player.scol = 3;
+					player.sant = m_field.getAnts(9, 4) - 1;
+					player.selectS = true;
+
+					m_field.ClearAllVisualModes();
+					m_field.SetVisualMode(9, 4, Field::V_MOVE_SOURCE);
+
+					m_stateStep = 3;
+				}
+				return;
+			}
+			if (m_stateStep == 3)
+			{
+				m_field.SetVisualMode(9, 3, Field::V_HOVER);
+				SetMouseTarget(9, 3);
+				m_stateStep = 4;
+				return;
+			}
+			if (m_stateStep == 4)
+			{
+				if (m_mouseMoving || m_mouseTap < 3)
+					return;
+
+				m_dialogIndex = 9;
+				m_showDialog = true;
+				m_stateStep = 5;
+				return;
+			}
+			if (m_stateStep == 5)
+			{
+				if (Next)
+				{
+					m_showDialog = false;
+
+					player.trow = 9;
+					player.tcol = 3;
+					player.selectT = true;
+
+					m_field.ClearVisualModeType(Field::V_HOVER);
+					m_field.SetVisualMode(9, 3, Field::V_MOVE_TARGET);
+
+					m_dialogIndex = 10;
+					m_showDialog = true;
+					m_stateStep = 6;
+				}
+				return;
+			}
+			if (m_stateStep == 6)
+			{
+				if (Next)
+				{
+					m_showDialog = false;
+					SetMouseTarget(m_renderer.GetAnt());
+					m_stateStep = 7;
+				}
+				return;
+			}
+			if (m_stateStep == 7)
+			{
+				if (m_mouseMoving || m_mouseTap < 3)
+					return;
+
+				m_overlayAnts = 1;
+				m_showAntOverlay = true;
+				m_stateStep = 8;
+				return;
+			}
+			if (m_stateStep == 8)
+			{
+				if (Next)
+				{
+					m_showAntOverlay = false;
+
+					int ants = m_overlayAnts;
+
+					m_field.setAnts(
+						player.srow,
+						player.scol,
+						m_field.getAnts(player.srow, player.scol) - ants);
+
+					m_field.setAnts(
+						player.trow,
+						player.tcol,
+						m_field.getAnts(player.trow, player.tcol) + ants);
+
+					player.selectS = false;
+					player.selectT = false;
+
+					m_field.ClearAllVisualModes();
+
+					m_dialogIndex = 10;
+					m_showDialog = true;
+					m_stateStep = 9;
+					return;
+				}
+			}
+		}
+
+
 			return;
 
+		case WalkState::TURN_TRANSITION:
+		{}
+			return;
+		case WalkState::COMPLETE:
+		{}
+			return;
+
+		
 		}
 	}
 

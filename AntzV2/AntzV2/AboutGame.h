@@ -151,7 +151,7 @@ private:
 		},
 		{ //8
 			{
-				L"The highlighted cells are valid move targets.",
+				L"The highlighted cells with more than w ant are valid move sources.",
 				L"Red can move ants to an adjacent cell that it owns.",
 				L"Select the highlighted Red cell to continue."
 			}
@@ -824,7 +824,7 @@ public:
 					m_showDialog = false;
 
 					player.srow = 9;
-					player.scol = 3;
+					player.scol = 4;
 					player.sant = m_field.getAnts(9, 4) - 1;
 					player.selectS = true;
 
@@ -835,13 +835,31 @@ public:
 				}
 				return;
 			}
+
 			if (m_stateStep == 3)
 			{
-				m_field.SetVisualMode(9, 3, Field::V_HOVER);
+				Field::Area area = m_field.getArea(9, 4);
+
+				for (int row = area.rmin; row <= area.rmax; row++)
+				{
+					for (int col = area.cmin; col <= area.cmax; col++)
+					{
+						if (row == 9 && col == 4)
+							continue;
+
+						if (m_field.getOwner(row, col) != m_activePlayer)
+							continue;
+
+						m_field.SetVisualMode(row, col, Field::V_HOVER);
+					}
+				}
+
+				// The cursor demonstrates one valid target.
 				SetMouseTarget(9, 3);
 				m_stateStep = 4;
 				return;
 			}
+
 			if (m_stateStep == 4)
 			{
 				if (m_mouseMoving || m_mouseTap < 3)
@@ -852,6 +870,7 @@ public:
 				m_stateStep = 5;
 				return;
 			}
+
 			if (m_stateStep == 5)
 			{
 				if (Next)
@@ -865,44 +884,62 @@ public:
 					m_field.ClearVisualModeType(Field::V_HOVER);
 					m_field.SetVisualMode(9, 3, Field::V_MOVE_TARGET);
 
-					m_dialogIndex = 10;
-					m_showDialog = true;
+					// Move the mouse to the ant-count control first.
+					SetMouseTarget(m_renderer.GetAnt());
 					m_stateStep = 6;
 				}
 				return;
 			}
 			if (m_stateStep == 6)
 			{
-				if (Next)
-				{
-					m_showDialog = false;
-					SetMouseTarget(m_renderer.GetAnt());
-					m_stateStep = 7;
-				}
+				if (m_mouseMoving || m_mouseTap < 3)
+					return;
+
+				// Now explain the ant commitment.
+				m_dialogIndex = 9;
+				m_showDialog = true;
+				m_stateStep = 7;
 				return;
 			}
 			if (m_stateStep == 7)
 			{
-				if (m_mouseMoving || m_mouseTap < 3)
-					return;
+				if (Next)
+				{
+					m_showDialog = false;
 
-				m_overlayAnts = 1;
-				m_showAntOverlay = true;
-				m_stateStep = 8;
+					// Move to confirmation after the commitment dialog.
+					SetMouseTarget(m_renderer.GetConfirm());
+					m_stateStep = 8;
+				}
 				return;
 			}
 			if (m_stateStep == 8)
 			{
+				if (m_mouseMoving || m_mouseTap < 3)
+					return;
+
+				m_dialogIndex = 10;
+				m_showDialog = true;
+				m_stateStep = 9;
+				return;
+			}
+			if (m_stateStep == 9)
+			{
 				if (Next)
 				{
-					m_showAntOverlay = false;
+					m_showDialog = false;
 
-					int ants = m_overlayAnts;
+					int ants = 1;
 
+					// Update the HUD commitment values.
+					player.tant = ants;
+					player.sant = m_field.getAnts(player.srow, player.scol) - ants;
+
+					// Apply the move to the field.
 					m_field.setAnts(
 						player.srow,
 						player.scol,
-						m_field.getAnts(player.srow, player.scol) - ants);
+						player.sant);
 
 					m_field.setAnts(
 						player.trow,
@@ -914,12 +951,11 @@ public:
 
 					m_field.ClearAllVisualModes();
 
-					m_dialogIndex = 10;
-					m_showDialog = true;
-					m_stateStep = 9;
-					return;
+					m_stateStep = 10;
 				}
+				return;
 			}
+
 		}
 
 

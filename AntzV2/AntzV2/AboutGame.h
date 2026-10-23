@@ -148,7 +148,15 @@ private:
 				L"Skip to end the turn."
 			}
 		},
+		{ //11
+			{
+				L"Red's turn is complete.",
+				L"Blue would take its turn next.  When Blue's is complete,",
+				L"Red's turn begins again with Growth."
+			}
+		}
 	};
+
 	void FlashNextButton()
 	{
 		m_nextColors = !m_nextColors;
@@ -579,15 +587,17 @@ public:
 				m_players[m_activePlayer].selectS = false;
 				m_players[m_activePlayer].selectT = false;
 
-				m_dialogIndex = 3;
-				m_showDialog = true;
+				SetMouseTarget(9, 4);
 
 				m_stateStep = 1;
 				return;
 			}
 			if (m_stateStep == 1)
 			{
-				SetMouseTarget(9, 4);
+				if (m_mouseMoving || m_mouseTap < 3)
+					return;
+				m_dialogIndex = 3;
+				m_showDialog = true;
 				m_stateStep = 2;
 				return;
 			}
@@ -802,14 +812,17 @@ public:
 				player.selectS = false;
 				player.selectT = false;
 
-				m_dialogIndex = 8;
-				m_showDialog = true;
+				SetMouseTarget(9, 4);
 				m_stateStep = 1;
 				return;
 			}
 			if (m_stateStep == 1)
 			{
-				SetMouseTarget(9, 4);
+				if (m_mouseMoving || m_mouseTap < 3)
+					return;
+
+				m_dialogIndex = 8;
+				m_showDialog = true;
 				m_stateStep = 2;
 				return;
 			}
@@ -949,24 +962,35 @@ public:
 
 					m_field.ClearAllVisualModes();
 
-					m_stateStep = 10;
+					m_stateStep = 0;
+					m_state = WalkState::TURN_TRANSITION;
 				}
 				return;
 			}
 
 		}
-
-
-			return;
+		return;
 
 		case WalkState::TURN_TRANSITION:
-		{}
-			return;
-		case WalkState::COMPLETE:
-		{}
-			return;
+		{
+			if (m_stateStep == 0)
+			{
+				m_mousePos = { gWidth / 2, gHeight / 2 };
 
-		
+				m_dialogIndex = 11;
+				m_showDialog = true;
+
+				m_stateStep = 1;
+				return;
+			}
+			if (Next)
+			{
+				Stop();
+				return;
+			}
+		}
+		return;
+
 		}
 	}
 
@@ -1006,6 +1030,9 @@ public:
 		}
 
 	}
-	bool IsRunning() const;
+	bool IsRunning() const
+	{
+		return m_isRunning;
+	}
 
 };

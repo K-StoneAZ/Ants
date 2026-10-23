@@ -619,9 +619,19 @@ public:
         if (IsGamePage())
         {
             m_aboutGame.Update();
+
+            if (!m_aboutGame.IsRunning())
+            {
+                StopAbout();
+
+                m_page = A_Menu;
+                m_selectedItem = -1;
+                m_hoverItem = -1;
+
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+            }
         }
     }
-
     void StartAbout()
     {
         m_aboutGame.Start();

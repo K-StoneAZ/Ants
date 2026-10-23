@@ -431,8 +431,11 @@ public:
 				m_showDialog = false;
 			}
 		}
-		// Flash Next while the dialog is visible.
-		if (m_showDialog)
+		// Flash Next while a dialog or ant selection is active.
+		if (!Next &&
+			(m_showDialog ||
+				(m_state == WalkState::GROWTH && m_stateStep == 5) ||
+				(m_state == WalkState::ATTACK && m_stateStep == 8)))
 		{
 			FlashNextButton();
 		}

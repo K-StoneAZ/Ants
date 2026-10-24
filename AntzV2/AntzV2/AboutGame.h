@@ -976,6 +976,7 @@ public:
 			if (m_stateStep == 0)
 			{
 				m_mousePos = { gWidth / 2, gHeight / 2 };
+				m_mouseTarget = m_mousePos;
 
 				m_dialogIndex = 11;
 				m_showDialog = true;

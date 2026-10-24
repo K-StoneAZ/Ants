@@ -60,8 +60,7 @@ private:
 		GROWTH,
 		ATTACK,
 		MOVE,
-		TURN_TRANSITION,
-		COMPLETE
+		TURN_TRANSITION
 	};
 
 	WalkState m_state = WalkState::INTRO;
@@ -138,7 +137,7 @@ private:
 			{
 				L"Red can choose how many ants to commit to a move.",
 				L"Red must leave at least one ant behind in the source cell.",
-				L"For this example, Red will commit half of the available ants.",
+				L"For this example, Red will commit one ant.",
 			}
 		},
 		{ //10
@@ -151,7 +150,7 @@ private:
 		{ //11
 			{
 				L"Red's turn is complete.",
-				L"Blue would take its turn next.  When Blue's is complete,",
+				L"Blue would take its turn next.  When Blue's turn is complete,",
 				L"Red's turn begins again with Growth."
 			}
 		}

@@ -1,6 +1,7 @@
 #pragma once
 #include "framework.h"
 #include "AboutGame.h"
+#include <memory>
 
 extern HBITMAP gSetupBackgroundBmp;
 extern int gWidth;
@@ -63,7 +64,7 @@ private:
         const wchar_t* paragraph4;
     };
 
-    AboutGame m_aboutGame;
+    std::unique_ptr<AboutGame> m_aboutGame;
     bool m_gameInit = false;
     HFONT m_textFont = nullptr;
 	HFONT m_headerFont = nullptr;
@@ -618,9 +619,9 @@ public:
     {
         if (IsGamePage())
         {
-            m_aboutGame.Update();
+            m_aboutGame->Update();
 
-            if (!m_aboutGame.IsRunning())
+            if (!m_aboutGame->IsRunning())
             {
                 StopAbout();
 
@@ -634,14 +635,24 @@ public:
     }
     void StartAbout()
     {
-        m_aboutGame.Start();
+        m_aboutGame = std::make_unique<AboutGame>();
+        m_gameInit = false;
+
+        m_aboutGame->Start();
         StartAboutTimer();
     }
 
     void StopAbout()
     {
-        m_aboutGame.Stop();
         StopAboutTimer();
+
+        if (m_aboutGame)
+        {
+            m_aboutGame->Stop();
+            m_aboutGame.reset();
+        }
+
+        m_gameInit = false;
     }
 
 
@@ -678,13 +689,16 @@ public:
         }
         else if (m_page == A_Game)
         {
-            if (!m_gameInit)
+            if (m_aboutGame)
             {
-                m_aboutGame.Initialize(hdc);
-                m_gameInit = true;
-            }
+                if (!m_gameInit)
+                {
+                    m_aboutGame->Initialize(hdc);
+                    m_gameInit = true;
+                }
 
-            m_aboutGame.Render();
+                m_aboutGame->Render();
+            }
         }
         else if (m_page == A_Credits)
         {
@@ -722,7 +736,8 @@ public:
         {
             return false;
         }
-        if (m_page == A_Game && m_aboutGame.HandleMouse(message, lParam))
+        if (m_page == A_Game && m_aboutGame &&
+            m_aboutGame->HandleMouse(message, lParam))
         {
             InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;

@@ -510,9 +510,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 LoadGameDialog(hWnd);
                 break;
             case IDM_ABOUT:
-                gAbout.Initialize(hWnd);
-                gAbout.Show();
-                InvalidateRect(hWnd, nullptr, FALSE);
+                if (gGame.CanShowAbout())
+                {
+                    gAbout.Initialize(hWnd);
+                    gAbout.Show();
+                    InvalidateRect(hWnd, nullptr, FALSE);
+                }
                 break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);

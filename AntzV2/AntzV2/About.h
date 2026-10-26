@@ -880,6 +880,13 @@ public:
 
         if (wParam == VK_ESCAPE)
         {
+            if(m_page == A_Game)
+            {
+                StopAbout();
+                m_visible = false;
+                return true;
+			}
+
             if (m_page == A_HowTo && m_howToPage != H_Menu)
             {
                 m_howToPage = H_Menu;

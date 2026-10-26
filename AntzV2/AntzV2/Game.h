@@ -1710,6 +1710,12 @@ void OnChar(char ch)
      return m_turnState == T_GROWTH && m_growthStart;
  }
 
+ bool CanShowAbout() const
+ {
+     return m_players[m_activePlayer].m_playertype == 1
+         && !m_renderer.IsBattleActive();
+ }
+
  void Render()
     {
         m_renderer.Render(m_field, m_players, m_dialog, GetPlayer(),

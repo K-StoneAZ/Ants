@@ -1045,6 +1045,10 @@ public:
     RECT GetCancel() const { return m_cancelRect; }
     RECT GetSkip() const { return m_skipRect; }
     RECT GetSpeed() const { return m_speedRect; }
+    bool IsBattleActive() const
+    {
+        return m_battleActive;
+    }
 
     const std::vector<CellRect>& GetCellRects() const { return m_cellRects; }
 

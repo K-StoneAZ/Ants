@@ -639,11 +639,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (gAppState)
         {
         case APP_TITLE:
-            gAppState = APP_SETUP;
+        {
+            wchar_t recoveryPath[MAX_PATH];
+            GetExeDirectory(recoveryPath, MAX_PATH);
+            wcscat_s(recoveryPath, L"AntzRecovery.antz");
+
+            if (FileExists(recoveryPath))
+                gAppState = APP_RECOVERY;
+            else
+                gAppState = APP_SETUP;
+
             InvalidateRect(hWnd, nullptr, TRUE);
             return 0;
+        }
 
         case APP_RECOVERY:
+            gSetup.HandleMouseClick(hWnd, pt.x, pt.y);
+            InvalidateRect(hWnd, nullptr, TRUE);
             return 0;
 
         case APP_SETUP:

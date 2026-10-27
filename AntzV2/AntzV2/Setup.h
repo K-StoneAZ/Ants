@@ -959,9 +959,28 @@ public:
             }
         }
 
-        if (gAppState == APP_RECOVERY) 
+        if (gAppState == APP_RECOVERY)
         {
-            // Recovery screen click handling goes here.
+            // RESUME GAME
+            if (x >= m_replayRect.left && x <= m_replayRect.right &&
+                y >= m_replayRect.top && y <= m_replayRect.bottom)
+            {
+                gAppState = APP_GAME;
+                return;
+            }
+
+            // NEW GAME
+            if (x >= m_newGameRect.left && x <= m_newGameRect.right &&
+                y >= m_newGameRect.top && y <= m_newGameRect.bottom)
+            {
+                m_GameConfigComplete = false;
+                m_PlayerConfigComplete = false;
+                ready = false;
+                gAppState = APP_SETUP;
+                return;
+            }
+
+            return;
         }
 
         if (!m_GameConfigComplete)

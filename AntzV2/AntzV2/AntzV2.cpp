@@ -48,7 +48,15 @@ AppState gAppState = APP_TITLE;
 HBITMAP gTitleBmp = nullptr;
 HDC gTitleDC = nullptr;
 HBITMAP gSetupBackgroundBmp = nullptr;
-
+bool ConfirmQuit(HWND hWnd)
+{
+    return MessageBoxW(
+        hWnd,
+        L"Are you sure you want to quit Antz?",
+        L"Confirm Exit",
+        MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2
+    ) == IDYES;
+}
 // Global Variables:
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
@@ -436,6 +444,55 @@ void SaveGameDialog(HWND hWnd)
             OutputDebugStringW(L"Game save failed\n");
     }
 }
+
+void SaveRecoveryCheckpoint()
+{
+    if (!gGame.CanSave())
+        return;
+
+    wchar_t exePath[MAX_PATH];
+    GetExeDirectory(exePath, MAX_PATH);
+
+    wchar_t tempPath[MAX_PATH];
+    wchar_t recoveryPath[MAX_PATH];
+
+    if (swprintf_s(
+        tempPath, MAX_PATH,
+        L"%s\\AntzRecovery.tmp", exePath) < 0)
+    {
+        OutputDebugStringW(L"Recovery save path failed\n");
+        return;
+    }
+
+    if (swprintf_s(
+        recoveryPath, MAX_PATH,
+        L"%s\\AntzRecovery.antz", exePath) < 0)
+    {
+        OutputDebugStringW(L"Recovery save path failed\n");
+        return;
+    }
+
+    if (gGame.Save(tempPath) != 0)
+    {
+        DeleteFileW(tempPath);
+        OutputDebugStringW(L"Recovery save failed\n");
+        return;
+    }
+
+    if (!MoveFileExW(
+        tempPath,
+        recoveryPath,
+        MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
+    {
+        DeleteFileW(tempPath);
+        OutputDebugStringW(L"Recovery checkpoint replacement failed\n");
+        return;
+    }
+
+    OutputDebugStringW(L"Recovery checkpoint saved\n");
+}
+
+
 void LoadGameDialog(HWND hWnd)
 {
     if (gAppState == APP_GAME)
@@ -518,7 +575,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
                 break;
             case IDM_EXIT:
-                DestroyWindow(hWnd);
+                if (ConfirmQuit(hWnd))
+                {
+                    DestroyWindow(hWnd);
+                }
                 break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -538,6 +598,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         gGame.SetDemandRepaintCallback(DemandRepaintGame);
         gGame.SetTimerCallbacks(StartTimer, StopTimer);
 		gGame.SetGameWinCallback(GameWin);
+        gGame.SetRecoverySaveCallback(SaveRecoveryCheckpoint);
         return 0;
     }
 
@@ -597,7 +658,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             if (gAppState == APP_GAMEOVER)
             {
-                DestroyWindow(hWnd);
+                if (ConfirmQuit(hWnd))
+                {
+                    DestroyWindow(hWnd);
+                }
                 return 0;
             }
 
@@ -619,7 +683,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             return 0;
 
         case APP_GAMEOVER:
-            DestroyWindow(hWnd);
+            if (ConfirmQuit(hWnd))
+            {
+                DestroyWindow(hWnd);
+            }
             return 0;
         }
     }
@@ -693,6 +760,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_ERASEBKGND:
         return TRUE;
+
+    case WM_CLOSE:
+        if (ConfirmQuit(hWnd))
+        {
+            DestroyWindow(hWnd);
+        }
+        return 0;
 
     case WM_DESTROY:
 		FreeTitleScreen();

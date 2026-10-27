@@ -15,6 +15,8 @@ using RepaintCallback = void(*)();
 using DemandRepaintCallback = void(*)();
 using TimerCallback = void(*)(Timer, GameSpeed);
 using GameWinCallback = void(*)(const GameResult&);
+using RecoverySaveCallback = void(*)();
+
 class Game
 {
 private:
@@ -56,6 +58,7 @@ private:
     TimerCallback m_startTimer = nullptr;
     TimerCallback m_stopTimer = nullptr;
     GameWinCallback m_gameWin = nullptr;
+    RecoverySaveCallback m_recoverySave = nullptr;
 
     int m_hoverRow = -1;
     int m_hoverCol = -1;
@@ -160,6 +163,10 @@ public:
         {
             m_stopTimer(timer, m_gameSpeed);
         }
+    }
+    void SetRecoverySaveCallback(RecoverySaveCallback callback)
+    {
+        m_recoverySave = callback;
     }
 
     void ChangeSpeed()
@@ -737,6 +744,11 @@ void UpdateTurn()
             m_growthStart = true;
             m_turnState = T_GROWTH;
             m_dialog.m_mode = DIALOG_GROWTH;
+            // Save after every completed even-numbered round.
+            if (gTurn > 1 && gTurn % 2 == 1 && m_recoverySave)
+            {
+                m_recoverySave();
+            }
 
             m_aiStep = 0;
             m_tickCount = 0;

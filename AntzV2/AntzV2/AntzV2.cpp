@@ -296,6 +296,10 @@ void RenderBackBuffer() {
         RenderTitle();
         break;
 
+    case APP_RECOVERY:
+        gSetup.RenderRecovery(gMemDC);
+        break;
+
     case APP_SETUP:
         gSetup.RenderSetup(gMemDC);
         break;
@@ -637,6 +641,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case APP_TITLE:
             gAppState = APP_SETUP;
             InvalidateRect(hWnd, nullptr, TRUE);
+            return 0;
+
+        case APP_RECOVERY:
             return 0;
 
         case APP_SETUP:

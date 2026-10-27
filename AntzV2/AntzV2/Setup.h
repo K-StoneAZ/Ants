@@ -671,6 +671,44 @@ public:
         SelectObject(hdc, previousFont);
     }
 
+    void RenderRecovery(HDC hdc)
+    {
+        RenderBackground(hdc);
+        SetBkMode(hdc, TRANSPARENT);
+
+        // TITLE
+        HFONT previousFont = (HFONT)SelectObject(hdc, m_titleFont);
+        SetTextColor(hdc, gTITLEColor);
+
+        DrawText(hdc, L"GAME RECOVERY", -1, &m_titleRect,
+            DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+        SelectObject(hdc, previousFont);
+        previousFont = (HFONT)SelectObject(hdc, m_textFont);
+
+        // MESSAGE
+        RECT messageRect{ 150, 220, 950, 280 };
+        SetTextColor(hdc, gVALUEColor);
+
+        DrawText(hdc,
+            L"A saved game was found. Would you like to resume?",
+            -1, &messageRect,
+            DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+        // RECOVERY OPTIONS
+        DrawOptionButton(hdc,
+            m_replayRect.left, m_replayRect.top,
+            m_replayRect.right, m_replayRect.bottom,
+            false, L"Resume Game");
+
+        DrawOptionButton(hdc,
+            m_newGameRect.left, m_newGameRect.top,
+            m_newGameRect.right, m_newGameRect.bottom,
+            false, L"New Game");
+
+        SelectObject(hdc, previousFont);
+    }
+
     void RenderWin(HDC hdc)
        {
             // Draw the existing setup background
@@ -919,6 +957,11 @@ public:
                 gAppState = APP_GAMEOVER;
                 return;
             }
+        }
+
+        if (gAppState == APP_RECOVERY) 
+        {
+            // Recovery screen click handling goes here.
         }
 
         if (!m_GameConfigComplete)

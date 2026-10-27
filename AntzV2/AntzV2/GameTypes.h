@@ -6,6 +6,7 @@
 enum AppState
 {
     APP_TITLE,
+    APP_RECOVERY,
     APP_SETUP,
     APP_GAME,
     APP_WIN,

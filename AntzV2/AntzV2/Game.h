@@ -352,7 +352,10 @@ public:
 		// Load Field
 		m_field.LoadFieldInit(m_config, file);
 
+        int totalCells = m_config.m_FieldSize * m_config.m_FieldSize;
+        m_winCount = (totalCells * 2) / 3;
         fclose(file);
+
         m_turnState = T_START;
         UpdateTurn();
 		return true;
@@ -828,7 +831,8 @@ void UpdateTurn()
                     break;
                 }
 
-            } while (m_players[m_activePlayer].m_cells_owned == 0);
+            }
+           while (m_players[m_activePlayer].m_cells_owned == 0);
 
             if (m_turnState == T_WIN)
             {

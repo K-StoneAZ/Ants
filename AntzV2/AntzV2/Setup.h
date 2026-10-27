@@ -56,7 +56,6 @@ private:
     bool m_GameConfigComplete = false;
 	bool m_PlayerConfigComplete = false;
     bool ready = false;
-    bool m_recoveryResume = false;
     int m_ActiveTextBox = -1;
     std::vector<TextBox> m_nameBoxes;
     std::vector<std::string> m_robotNamePool;
@@ -152,6 +151,8 @@ private:
        return persona;
    }
 public:
+    bool m_recover = false;
+
     const GameConfig& GetConfig() const
     {
         return m_config;
@@ -165,11 +166,6 @@ public:
         return ready;
 	}
     void ClearReady() { ready = false; }
-
-    bool RecoveryResumeRequested() const
-    {
-        return m_recoveryResume;
-    }
 
     static Persona GetPersonaIndex(const std::wstring& personaName)
     {
@@ -971,8 +967,9 @@ public:
             if (x >= m_replayRect.left && x <= m_replayRect.right &&
                 y >= m_replayRect.top && y <= m_replayRect.bottom)
             {
-                gAppState = APP_GAME;
-                return;
+            m_recover = true;
+            //gAppState = APP_GAME;
+            return;
             }
 
             // NEW GAME
@@ -982,6 +979,7 @@ public:
                 m_GameConfigComplete = false;
                 m_PlayerConfigComplete = false;
                 ready = false;
+                m_recover = false;
                 gAppState = APP_SETUP;
                 return;
             }

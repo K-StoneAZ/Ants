@@ -645,9 +645,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             wcscat_s(recoveryPath, L"AntzRecovery.antz");
 
             if (FileExists(recoveryPath))
+            {
+                gRecoveryPath = recoveryPath;
                 gAppState = APP_RECOVERY;
-            else
+            }
+            else 
+            {
                 gAppState = APP_SETUP;
+            }
 
             InvalidateRect(hWnd, nullptr, TRUE);
             return 0;
@@ -655,6 +660,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case APP_RECOVERY:
             gSetup.HandleMouseClick(hWnd, pt.x, pt.y);
+            if (gSetup.m_recover)
+            {
+                if (gGame.Load(gRecoveryPath.c_str()))
+                {
+                    gAppState = APP_GAME;
+                }
+                gSetup.m_recover = false;
+            }
             InvalidateRect(hWnd, nullptr, TRUE);
             return 0;
 

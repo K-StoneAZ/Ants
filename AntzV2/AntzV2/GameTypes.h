@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+std::wstring gRecoveryPath;
+
 enum AppState
 {
     APP_TITLE,

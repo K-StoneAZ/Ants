@@ -355,6 +355,17 @@ public:
         int totalCells = m_config.m_FieldSize * m_config.m_FieldSize;
         m_winCount = (totalCells * 2) / 3;
         fclose(file);
+        // Set game defaults
+        m_clicked = CLICK_NONE;
+        m_hoverRow = -1;
+        m_hoverCol = -1;
+        m_selectedRow = -1;
+        m_selectedCol = -1;
+        m_successfulCount = 0;
+        m_aiStep = 0;
+        m_tickCount = 0;
+        m_delay = 0;
+        m_result = GameResult{};
 
         m_turnState = T_START;
         UpdateTurn();

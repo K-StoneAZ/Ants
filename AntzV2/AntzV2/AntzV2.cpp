@@ -167,6 +167,7 @@ void StopTimer(Timer timer, GameSpeed speed)
 void GameWin(const GameResult& result)
 {
     g_Result = result;
+    gSetup.SetGameResult(result);
     gAppState = APP_WIN;
     InvalidateRect(gHwnd, nullptr, FALSE);
 }
@@ -532,6 +533,7 @@ void LoadGameDialog(HWND hWnd)
     {
         if (gGame.Load(fileName))
         {
+            gSetup.SetLoadedGameData( gGame.GetConfig(), gGame.GetPlayerConfig());
             gAppState = APP_GAME;
             OutputDebugStringW(L"Game loaded\n");
         }
@@ -664,8 +666,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 if (gGame.Load(gRecoveryPath.c_str()))
                 {
+                    gSetup.SetLoadedGameData(
+                        gGame.GetConfig(),
+                        gGame.GetPlayerConfig());
                     gAppState = APP_GAME;
                 }
+
                 gSetup.m_recover = false;
             }
             InvalidateRect(hWnd, nullptr, TRUE);

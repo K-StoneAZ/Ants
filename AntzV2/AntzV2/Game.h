@@ -1732,6 +1732,16 @@ void OnChar(char ch)
         return m_activePlayer;
     }
 
+ const GameConfig& GetConfig() const
+ {
+     return m_config;
+ }
+
+ const std::vector<PlayerConfig>& GetPlayerConfig() const
+ {
+     return m_playerConfig;
+ }
+
  bool CanSave() const
  {
      return m_turnState == T_GROWTH && m_growthStart;

@@ -72,10 +72,6 @@ private:
 	RECT m_newGameRect{ 475, 650, 625, 710 }; // new game button
 	RECT m_exitRect{ 675, 650, 825, 710 }; // exit button
 
-   void SetGameResult(const GameResult& result)
-    {
-        m_result = result;
-	}
    void DefineFonts()
    {
        m_titleFont = CreateFont(
@@ -152,6 +148,17 @@ private:
    }
 public:
     bool m_recover = false;
+
+    void SetGameResult(const GameResult& result)
+    {
+        m_result = result;
+	}
+
+    void SetLoadedGameData( const GameConfig& config, const std::vector<PlayerConfig>& players)
+    {
+        m_config = config;
+        m_players = players;
+    }
 
     const GameConfig& GetConfig() const
     {

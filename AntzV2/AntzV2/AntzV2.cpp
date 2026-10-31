@@ -577,6 +577,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     InvalidateRect(hWnd, nullptr, FALSE);
                 }
                 break;
+            case IDM_CREDITS:
+                gAbout.Initialize(hWnd);
+                gAbout.ShowCredits();
+                break;
             case IDM_EXIT:
                 if (ConfirmQuit(hWnd))
                 {

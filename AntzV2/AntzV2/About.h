@@ -604,6 +604,15 @@ public:
         InvalidateRect(m_hWnd, nullptr, FALSE);
     }
 
+    void ShowCredits()
+    {
+        m_visible = true;
+        m_page = A_Credits;
+        m_selectedItem = -1;
+        m_hoverItem = -1;
+        InvalidateRect(m_hWnd, nullptr, FALSE);
+    }
+
     bool IsVisible() const
     {
         return m_visible;
@@ -743,7 +752,17 @@ public:
         }
         if (m_page != A_Menu)
         {
-            if (m_page == A_HowTo)
+            if (m_page == A_Credits)
+            {
+                if (message == WM_LBUTTONDOWN)
+                {
+                    m_visible = false;
+                    InvalidateRect(m_hWnd, nullptr, FALSE);
+                    return true;
+                }
+                return false;
+            }
+            else if (m_page == A_HowTo)
             {
                 // allow How To mouse handling below
             }
@@ -892,6 +911,13 @@ public:
                 m_howToPage = H_Menu;
                 m_selectedItem = -1;
                 m_hoverItem = -1;
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+                return true;
+            }
+
+            if (m_page == A_Credits)
+            {
+                m_visible = false;
                 InvalidateRect(m_hWnd, nullptr, FALSE);
                 return true;
             }

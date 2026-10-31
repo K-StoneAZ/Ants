@@ -88,12 +88,8 @@ UINT GetInterval(Timer timer, GameSpeed speed)
     switch (timer)
     {
     case Timer::Battle:
-        switch (speed)
         {
-        case GameSpeed::Half:     return 2500;
-        case GameSpeed::Normal:   return 1250;
-        case GameSpeed::Fast:     return 625;
-        case GameSpeed::Fastest:  return 312;
+        return 1250;
         }
         break;
 

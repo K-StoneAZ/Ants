@@ -468,7 +468,7 @@ public:
 
     void RenderBattle(const std::vector<PlayerData>& players, int thisPlayer)
     {
-        RECT frame = m_statusRect;
+        RECT frame = m_hudRect;
 
         // Overall status pane background
         HBRUSH background = CreateSolidBrush(RGB(40, 80, 40));
@@ -476,12 +476,7 @@ public:
         DeleteObject(background);
 
         // Title pane
-        RECT titleRect = { frame.left + BORDER_SIZE, frame.top + BORDER_SIZE,
-        frame.right - BORDER_SIZE, frame.top + TITLE_HEIGHT };
-
-        //HBRUSH titleBrush = CreateSolidBrush(RGB(60, 60, 60));
-        //FillRect(m_hdc, &titleRect, titleBrush);
-        //DeleteObject(titleBrush);
+        RECT titleRect = { frame.left, frame.top + 10, frame.right, frame.top + 50 };
 
         SetTextColor(m_hdc, m_antColor2);
         SetBkMode(m_hdc, TRANSPARENT);
@@ -492,79 +487,99 @@ public:
             DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
         // Combat panes
-        int paneTop = frame.top + TITLE_HEIGHT + BORDER_SIZE;
-        int paneBottom = frame.bottom - BORDER_SIZE;
+        int titleY = frame.top + 10;
+        int playerY = titleY + 45;
+        int statusY = playerY + 45;
+        int countY = statusY + 45;
+        int centerX = frame.left + (HUD_WIDTH / 2);
 
-        int paneWidth = (frame.right - frame.left - (BORDER_SIZE * 3)) / 2;
+        RECT attackerRect = {
+            frame.left + 15, statusY,
+            centerX - 10, statusY + 25
+        };
 
-        RECT attackerRect = { frame.left + BORDER_SIZE, paneTop,
-            frame.left + BORDER_SIZE + paneWidth, paneBottom };
-
-        RECT defenderRect = { attackerRect.right + BORDER_SIZE, paneTop,
-            frame.right - BORDER_SIZE, paneBottom };
+        RECT defenderRect = {
+            centerX + 10, statusY,
+            frame.right - 15, statusY + 25
+        };
 
         // Attacker pane
         HBRUSH attackerBrush = CreateSolidBrush(m_playerColors[players[thisPlayer].m_playerID]);
         FillRect(m_hdc, &attackerRect, attackerBrush);
-        DeleteObject(attackerBrush);
 
         // Defender pane
         HBRUSH defenderBrush = CreateSolidBrush(m_playerColors[players[thisPlayer].tplayerID]);
         FillRect(m_hdc, &defenderRect, defenderBrush);
-        DeleteObject(defenderBrush);
 
+        // Player names
         SetTextColor(m_hdc, m_antColor1);
         SetBkMode(m_hdc, TRANSPARENT);
 
         SelectObject(m_hdc, m_hudPlayerFont);
 
-        RECT textRect = attackerRect;
+        RECT attackerNameRect = { frame.left + 15, playerY,
+            centerX - 10, playerY + 25 };
+
+        RECT defenderNameRect = { centerX + 10, playerY,
+            frame.right - 15, playerY + 25 };
 
         DrawTextA(m_hdc,
             players[thisPlayer].m_playerName.c_str(),
             -1,
-            &textRect,
+            &attackerNameRect,
             DT_CENTER | DT_TOP | DT_SINGLELINE);
-
-        textRect = defenderRect;
 
         DrawTextA(m_hdc,
             players[players[thisPlayer].tplayerID].m_playerName.c_str(),
             -1,
-            &textRect,
+            &defenderNameRect,
             DT_CENTER | DT_TOP | DT_SINGLELINE);
 
         // Battle information
         SelectObject(m_hdc, m_hudTextFont);
 
-        RECT attackerInfo = attackerRect;
-        attackerInfo.top += 45;
-
         std::string attackText =
-            "\nRoll: " + std::to_string(players[thisPlayer].attackRoll) +
-            "\n\nAnts: " + std::to_string(players[thisPlayer].sant);
-
-        DrawTextA(m_hdc,
-            attackText.c_str(),
-            -1,
-            &attackerInfo,
-            DT_CENTER | DT_WORDBREAK);
-
-
-        RECT defenderInfo = defenderRect;
-        defenderInfo.top += 45;
+            "Roll: " + std::to_string(players[thisPlayer].attackRoll);
 
         std::string defenseText =
-            "\nRoll: " + std::to_string(players[thisPlayer].defenseRoll) +
-            "\n\nAnts: " + std::to_string(players[thisPlayer].tant);
+            "Roll: " + std::to_string(players[thisPlayer].defenseRoll);
 
-        DrawTextA(m_hdc,
-            defenseText.c_str(),
-            -1,
-            &defenderInfo,
-            DT_CENTER | DT_WORDBREAK);
+        DrawTextA(m_hdc, attackText.c_str(), -1,
+            &attackerRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
+        DrawTextA(m_hdc, defenseText.c_str(), -1,
+            &defenderRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+        // Ant counts
+        RECT attackerCountRect = {
+            frame.left + 15, countY,
+            centerX - 10, countY + 25
+        };
+
+        RECT defenderCountRect = {
+            centerX + 10, countY,
+            frame.right - 15, countY + 25
+        };
+
+        std::string attackAnts =
+            "Ants: " + std::to_string(players[thisPlayer].sant);
+
+        std::string defenseAnts =
+            "Ants: " + std::to_string(players[thisPlayer].tant);
+
+        FillRect(m_hdc, &attackerCountRect, attackerBrush);
+        FillRect(m_hdc, &defenderCountRect, defenderBrush);
+
+        DrawTextA(m_hdc, attackAnts.c_str(), -1,
+            &attackerCountRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+        DrawTextA(m_hdc, defenseAnts.c_str(), -1,
+            &defenderCountRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+        DeleteObject(attackerBrush);
+        DeleteObject(defenderBrush);
     }
+
 
     void RenderDialogFrame()
     {

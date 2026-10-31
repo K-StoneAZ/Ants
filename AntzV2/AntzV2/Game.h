@@ -806,7 +806,7 @@ void UpdateTurn()
         case T_MOVE:
 
                 m_dialog.m_mode = DIALOG_MOVE;
-
+				ClearBattle();
                 m_field.ClearAllVisualModes();
                 m_field.SetPlayerVisualMode(m_activePlayer);
 
@@ -971,7 +971,6 @@ void UpdateAttack()
             m_dialog.m_mode = DIALOG_MOVE;
             m_turnState = T_MOVE;
             m_field.setAnts( player.trow, player.tcol, player.tant);
-            ClearBattle();
             ClearHUDState();
             m_field.ClearAllVisualModes();
             player.success = false;
@@ -1020,7 +1019,6 @@ void UpdateAttack()
             m_players[m_activePlayer].m_cells_owned);
         OutputDebugStringW(data);
 
-        ClearBattle();
         ClearHUDState();
         m_renderer.SetBattleActive(false);
         m_field.ClearAllVisualModes();
@@ -1046,7 +1044,7 @@ void UpdateAttack()
             m_players[m_activePlayer].m_cells_owned);
         OutputDebugStringW(data);
 
-        ClearBattle();
+        //ClearBattle();
         ClearHUDState();
         m_field.SetPlayerVisualMode(m_activePlayer);
         m_dialog.m_mode = DIALOG_ATTACK;

@@ -1747,7 +1747,10 @@ void OnChar(char ch)
 
  bool CanShowAbout() const
  {
-     return m_players[m_activePlayer].m_playertype == 1
+     return !m_players.empty()
+         && m_activePlayer >= 0
+         && m_activePlayer < static_cast<int>(m_players.size())
+         && m_players[m_activePlayer].m_playertype == 1
          && !m_renderer.IsBattleActive();
  }
 

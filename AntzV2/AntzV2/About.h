@@ -256,7 +256,7 @@ private:
             L"Mouse over to highlight.\n"
             L"Click to select.\n"
             L"Click or <Enter> to confirm.\n" L"Click or <Space> to skip.\n"
-            L"Number keys to enter ant count.",
+            L"Use number keys to enter ant count.",
             -1, &rect, DT_LEFT | DT_WORDBREAK);
 
         y += 175;
@@ -898,10 +898,6 @@ public:
 
             if (m_page != A_Menu)
             {
-                if (m_page == A_Game)
-                {
-                    StopAbout();
-                }
                 m_page = A_Menu;
                 InvalidateRect(m_hWnd, nullptr, FALSE);
                 return true;
@@ -913,11 +909,52 @@ public:
             return true;
         }
 
+        // Keyboard navigation for the How To topic list.
+        if (m_page == A_HowTo)
+        {
+            if (m_howToPage != H_Menu)
+            {
+                return false;
+            }
+
+            switch (wParam)
+            {
+            case VK_UP:
+                m_selectedItem = (m_selectedItem < 0)
+                    ? 4 : (m_selectedItem + 4) % 5;
+
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+                return true;
+
+            case VK_DOWN:
+                m_selectedItem = (m_selectedItem + 1) % 5;
+
+                InvalidateRect(m_hWnd, nullptr, FALSE);
+                return true;
+
+            case VK_RETURN:
+                if (m_selectedItem >= 0 && m_selectedItem < 5)
+                {
+                    m_howToPage =
+                        static_cast<HowToPage>(m_selectedItem + 1);
+
+                    m_selectedItem = -1;
+                    m_hoverItem = -1;
+
+                    InvalidateRect(m_hWnd, nullptr, FALSE);
+                }
+                return true;
+            }
+
+            return false;
+        }
+
         if (m_page != A_Menu)
         {
             return false;
         }
 
+        // Existing About menu navigation. Unchanged.
         switch (wParam)
         {
         case VK_UP:
@@ -936,6 +973,13 @@ public:
             {
                 StartAbout();
             }
+
+            if (m_page == A_HowTo)
+            {
+                m_selectedItem = -1;
+                m_hoverItem = -1;
+            }
+
             InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;
         

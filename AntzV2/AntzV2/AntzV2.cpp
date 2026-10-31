@@ -569,7 +569,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 LoadGameDialog(hWnd);
                 break;
             case IDM_ABOUT:
-                if (gGame.CanShowAbout())
+
+                if (gAppState != APP_GAME || gGame.CanShowAbout())
                 {
                     gAbout.Initialize(hWnd);
                     gAbout.Show();

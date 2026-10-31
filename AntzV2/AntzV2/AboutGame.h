@@ -87,8 +87,8 @@ private:
 		},
 		{ //2
 			{
-				L"Click OK to add ants to the selected cell",
-				L"Click Cancel to choose a different cell"
+				L"Click OK or <enter>to add ants to the selected cell",
+				L"Click Cancel or <esc> to choose a different cell"
 			}
 		},
 		{ //3
@@ -109,19 +109,19 @@ private:
 			{
 				L"Red can choose how many ants to commit to an attack.",
 				L"Red must leave at least one ant behind in the source cell.",
-				L"For this example, Red will commit half of the available ants.",
+				L"Using the number keys, enter the count. Red will commit half.",
 			}
 		},
 		{ //6
 			{
 				L"The attack is ready.",
-				L"Click OK to confirm, Cancel to choose a different cell or",
-				L"Skip to go to Move stage."
+				L"Click OK or <enter> to confirm, Cancel or <esc> to choose a different cell or",
+				L"click Skip or <space> to go to Move stage."
 			}
 		},
 		{ //7
 			{
-				L"Red's First attack is successful.",
+				L"Red's first attack is successful.",
 				L"Red may attack again, or choose Skip to go",
 				L"to the move stage."
 			}
@@ -137,14 +137,14 @@ private:
 			{
 				L"Red can choose how many ants to commit to a move.",
 				L"Red must leave at least one ant behind in the source cell.",
-				L"For this example, Red will commit one ant.",
+				L"Using the number keys, enter the count. Red will commit one ant.",
 			}
 		},
 		{ //10
 			{
 				L"The move is ready.",
-				L"Click OK to confirm, Cancel to choose a different cell or",
-				L"Skip to end the turn."
+				L"Click OK or <enter> to confirm, Cancel or <esc> to choose a different cell or",
+				L"click Skip or <space> to end the turn."
 			}
 		},
 		{ //11

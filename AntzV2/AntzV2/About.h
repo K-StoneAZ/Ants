@@ -21,7 +21,8 @@ private:
         A_Controls,
         A_AI,
         A_HowTo,
-        A_Game
+        A_Game,
+        A_Credits
     };
     AboutPage m_page = A_Menu;
 
@@ -697,6 +698,10 @@ public:
 
                 m_aboutGame->Render();
             }
+        }
+        else if (m_page == A_Credits)
+        {
+            Credits(hdc);
         }
         else
         {

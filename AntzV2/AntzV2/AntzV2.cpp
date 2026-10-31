@@ -179,7 +179,18 @@ void GetExeDirectory(wchar_t* outPath, int size)
     wchar_t* lastSlash = wcsrchr(outPath, L'\\');
     if (lastSlash)
         *(lastSlash + 1) = 0; // keep trailing slash
+
 }
+void GetExeDirectory(char* outPath, int size)
+{
+    wchar_t widePath[MAX_PATH];
+
+    GetExeDirectory(widePath, MAX_PATH);
+
+    WideCharToMultiByte( CP_UTF8, 0, widePath, -1,
+        outPath, size, nullptr, nullptr );
+}
+
 bool FileExists(const wchar_t* path)
 {
     DWORD attrs = GetFileAttributesW(path);

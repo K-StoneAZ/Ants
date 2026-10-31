@@ -20,6 +20,14 @@ public:
         return true;
     }
 
+    bool PlayFile(const char* filePath)
+    {
+        if (!m_initialized)
+            return false;
+
+        return ma_engine_play_sound(&m_engine, filePath, nullptr) == MA_SUCCESS;
+    }
+
     void Shutdown()
     {
         if (m_initialized)

@@ -6,7 +6,7 @@
 #define IDD_ANTZV2_DIALOG               102
 #define IDS_APP_TITLE                   103
 #define IDD_ABOUTBOX                    103
-#define IDM_ABOUT                       104
+#define IDM_TUTORIAL                    104
 #define IDM_EXIT                        105
 #define IDI_ANTZV2                      107
 #define IDI_SMALL                       108
@@ -14,6 +14,9 @@
 #define IDR_MAINFRAME                   128
 #define ID_FILE_SAVEGAME                32771
 #define ID_FILE_LOAD                    32772
+#define IDM_APP_OPTIONS                 32773
+#define IDM_APP_ABOUT                   32774
+#define IDM_CREDITS                     32775
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

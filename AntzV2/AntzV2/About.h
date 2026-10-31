@@ -21,21 +21,19 @@ private:
         A_Controls,
         A_AI,
         A_HowTo,
-        A_Game,
-        A_Credits
+        A_Game
     };
     AboutPage m_page = A_Menu;
 
-    const wchar_t* m_menuItems[6] =
+    const wchar_t* m_menuItems[5] =
     {
         L"Rules",
         L"Controls",
         L"AI",
         L"How To",
-        L"Game",
-        L"Credits"
+        L"Game"
     };
-    RECT m_menuRects[6] = {};
+    RECT m_menuRects[5] = {};
     enum HowToPage
     {
         H_Menu,
@@ -86,10 +84,10 @@ private:
         const int left = (rc.right - menuWidth) / 2;
         const int right = left + menuWidth;
         const int rowHeight = 35;
-        const int totalHeight = rowHeight * 6;
+        const int totalHeight = rowHeight * 5;
         const int top = (rc.bottom - totalHeight) / 2;
 
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < 5; ++i)
         {
             m_menuRects[i].left = left;
             m_menuRects[i].right = right;
@@ -700,13 +698,9 @@ public:
                 m_aboutGame->Render();
             }
         }
-        else if (m_page == A_Credits)
-        {
-            Credits(hdc);
-        }
         else
         {
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 RECT textRect = m_menuRects[i];
 
@@ -772,7 +766,7 @@ public:
             int hoverItem = -1;
             if (m_page == A_Menu)
             {
-                for (int i = 0; i < 6; ++i)
+                for (int i = 0; i < 5; ++i)
                 {
                     if (PtInRect(&m_menuRects[i], POINT{ x, y }))
                     {
@@ -832,7 +826,7 @@ public:
                 return true;
             }
 
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 if (PtInRect(&m_menuRects[i], POINT{ x, y }))
                 {
@@ -884,6 +878,7 @@ public:
             {
                 StopAbout();
                 m_visible = false;
+                InvalidateRect(m_hWnd, nullptr, FALSE);
                 return true;
 			}
 
@@ -958,12 +953,12 @@ public:
         switch (wParam)
         {
         case VK_UP:
-            m_selectedItem = (m_selectedItem + 5) % 6;
+            m_selectedItem = (m_selectedItem + 4) % 5;
             InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;
 
         case VK_DOWN:
-            m_selectedItem = (m_selectedItem + 1) % 6;
+            m_selectedItem = (m_selectedItem + 1) % 5;
             InvalidateRect(m_hWnd, nullptr, FALSE);
             return true;
 

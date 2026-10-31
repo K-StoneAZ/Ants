@@ -11,6 +11,9 @@
 #include <ctime>
 #include <cstdlib>
 
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
+
 
 #define MAX_LOADSTRING 100
 

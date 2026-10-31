@@ -13,6 +13,7 @@
 
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
+#include "Audio.h"
 
 
 #define MAX_LOADSTRING 100
@@ -45,6 +46,7 @@ Setup gSetup;
 Game gGame;
 GameResult g_Result;
 About gAbout;
+Audio gAudio;
 
 AppState gAppState = APP_TITLE;
 
@@ -530,10 +532,12 @@ void LoadGameDialog(HWND hWnd)
 
     if (GetOpenFileNameW(&ofn))
     {
+
         if (gGame.Load(fileName))
         {
             gSetup.SetLoadedGameData( gGame.GetConfig(), gGame.GetPlayerConfig());
             gAppState = APP_GAME;
+            gAbout.Hide();
             OutputDebugStringW(L"Game loaded\n");
         }
         else
@@ -602,6 +606,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         InitBackBuffer(hWnd);
         LoadTitleScreen();
         LoadSetupBackground();
+        gAudio.Initialize();
         gSetup.Initialize(hWnd);
         gGame.Initialize(gMemDC);
         gGame.SetRepaintCallback(RepaintGame);
@@ -813,6 +818,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
 		FreeTitleScreen();
         FreeSetupBackground();
+        gAudio.Shutdown();
         gSetup.Shutdown();
         if (gMemDC)
         {

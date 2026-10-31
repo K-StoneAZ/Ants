@@ -618,6 +618,17 @@ public:
         return m_visible;
     }
 
+    void Hide()
+    {
+        if (m_page == A_Game)
+        {
+            StopAbout();
+        }
+
+        m_visible = false;
+        InvalidateRect(m_hWnd, nullptr, FALSE);
+    }
+
     bool IsGamePage() const
     {
         return m_visible && m_page == A_Game;

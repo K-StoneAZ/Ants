@@ -16,6 +16,7 @@ using DemandRepaintCallback = void(*)();
 using TimerCallback = void(*)(Timer, GameSpeed);
 using GameWinCallback = void(*)(const GameResult&);
 using RecoverySaveCallback = void(*)();
+using SoundCallback = void(*)(const char*);
 
 class Game
 {
@@ -59,6 +60,7 @@ private:
     TimerCallback m_stopTimer = nullptr;
     GameWinCallback m_gameWin = nullptr;
     RecoverySaveCallback m_recoverySave = nullptr;
+    SoundCallback m_sound = nullptr;
 
     int m_hoverRow = -1;
     int m_hoverCol = -1;
@@ -167,6 +169,17 @@ public:
     void SetRecoverySaveCallback(RecoverySaveCallback callback)
     {
         m_recoverySave = callback;
+    }
+    void SetSoundCallback(SoundCallback callback)
+    {
+        m_sound = callback;
+    }
+    void PlaySound(const char* filename)
+    {
+        if (m_sound)
+        {
+            m_sound(filename);
+        }
     }
 
     void ChangeSpeed()

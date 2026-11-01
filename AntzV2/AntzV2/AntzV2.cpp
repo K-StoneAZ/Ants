@@ -190,6 +190,23 @@ void GetExeDirectory(char* outPath, int size)
     WideCharToMultiByte( CP_UTF8, 0, widePath, -1,
         outPath, size, nullptr, nullptr );
 }
+void PlayGameSound(const char* filename)
+{
+    if (!filename || filename[0] == '\0')
+        return;
+
+    char exePath[MAX_PATH] = {};
+    char soundPath[MAX_PATH] = {};
+
+    GetExeDirectory(exePath, MAX_PATH);
+
+    int result = sprintf_s( soundPath, MAX_PATH, "%s%s", exePath, filename);
+
+    if (result < 0)
+        return;
+
+    gAudio.PlayFile(soundPath);
+}
 
 bool FileExists(const wchar_t* path)
 {
@@ -625,6 +642,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         gGame.SetTimerCallbacks(StartTimer, StopTimer);
 		gGame.SetGameWinCallback(GameWin);
         gGame.SetRecoverySaveCallback(SaveRecoveryCheckpoint);
+        gGame.SetSoundCallback(PlayGameSound);
         return 0;
     }
 

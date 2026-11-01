@@ -14,7 +14,7 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 #include "Audio.h"
-
+#include "Options.h"
 
 #define MAX_LOADSTRING 100
 
@@ -47,7 +47,7 @@ Game gGame;
 GameResult g_Result;
 About gAbout;
 Audio gAudio;
-
+Options gOptions;
 AppState gAppState = APP_TITLE;
 
 HBITMAP gTitleBmp = nullptr;

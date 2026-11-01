@@ -41,6 +41,7 @@ int gHeight = 900;
 int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 std::mt19937 gRNG;
+char gOptionsPath[MAX_PATH] = {};
 
 Setup gSetup;
 Game gGame;
@@ -363,6 +364,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     LoadStringW(hInstance, IDC_ANTZV2, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
+    // Prepare application options path
+    GetExeDirectory(gOptionsPath, MAX_PATH);
+    strcat_s(gOptionsPath, MAX_PATH, "AntzV2.ini");
+
     // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow))
     {
@@ -634,6 +639,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         InitBackBuffer(hWnd);
         LoadTitleScreen();
         LoadSetupBackground();
+        gOptions.Load(gOptionsPath);
         gAudio.Initialize();
         gSetup.Initialize(hWnd);
         gGame.Initialize(gMemDC);

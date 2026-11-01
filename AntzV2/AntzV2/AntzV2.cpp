@@ -653,6 +653,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         LoadTitleScreen();
         LoadSetupBackground();
         gOptions.Load(gOptionsPath);
+        gAudio.SetPreferences( gOptions.IsMusicEnabled(), gOptions.AreEffectsEnabled(),
+            gOptions.GetMusicVolume(), gOptions.GetEffectsVolume());
         gAudio.Initialize();
         gSetup.Initialize(hWnd);
         gGame.Initialize(gMemDC);

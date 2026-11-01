@@ -2,10 +2,12 @@
 
 #include "framework.h"
 #include <cstdio>
+#include "Audio.h"
 
 extern HBITMAP gSetupBackgroundBmp;
 extern int gWidth;
 extern int gHeight;
+extern Audio gAudio;
 
 class Options
 {
@@ -221,6 +223,9 @@ private:
 
         SetMusicVolume(m_tempMusicVolume);
         SetEffectsVolume(m_tempEffectsVolume);
+
+        gAudio.SetPreferences( m_musicEnabled, m_effectsEnabled,
+            m_musicVolume, m_effectsVolume);
 
         if (m_filePath)
             Save(m_filePath);

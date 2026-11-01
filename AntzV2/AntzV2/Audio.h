@@ -45,7 +45,6 @@ public:
         m_effectsVolume = (effectsVolume < 0) ? 0 :
             (effectsVolume > 100) ? 100 : effectsVolume;
 
-
     }
     bool MusicEnabled() const
     {

@@ -100,6 +100,9 @@ public:
         fprintf(file, "%d\n", m_effectsVolume);
 		fclose(file);
     }
+    void Show(HWND ghwnd)
+    {
 
+    }
 };
 

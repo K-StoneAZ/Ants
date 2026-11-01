@@ -12,6 +12,11 @@
 #define IDI_SMALL                       108
 #define IDC_ANTZV2                      109
 #define IDR_MAINFRAME                   128
+#define IDD_OPTIONS						129
+#define IDC_MUSIC_ENABLED			    1000
+#define IDC_EFFECTS_ENABLED				1001
+#define IDC_MUSIC_VOLUME				1002
+#define IDC_EFFECTS_VOLUME				1003
 #define ID_FILE_SAVEGAME                32771
 #define ID_FILE_LOAD                    32772
 #define IDM_APP_OPTIONS                 32773

@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
-
+#include <cstdio>
+#include <sstream>
 
 class Options
 {
@@ -64,22 +65,29 @@ public:
         m_effectsVolume = volume;
     }
 
-    void Load(const char* filePath)
+    void Load(const wchar_t* filePath)
     {
-        m_musicEnabled = GetPrivateProfileIntA(
-            "Audio", "MusicEnabled", 1, filePath) != 0;
+        FILE* file = nullptr;
 
-        m_effectsEnabled = GetPrivateProfileIntA(
-            "Audio", "EffectsEnabled", 1, filePath) != 0;
+        if (_wfopen_s(&file, filePath, L"r") != 0 || file == nullptr)
+            return;
 
-        m_musicVolume = GetPrivateProfileIntA(
-            "Audio", "MusicVolume", 70, filePath);
+        int value = 0;
 
-        m_effectsVolume = GetPrivateProfileIntA(
-            "Audio", "EffectsVolume", 100, filePath);
+        if (fscanf_s(file, "%d", &value) == 1)
+            m_musicEnabled = (value != 0);
 
-        SetMusicVolume(m_musicVolume);
-        SetEffectsVolume(m_effectsVolume);
+        if (fscanf_s(file, "%d", &value) == 1)
+            m_effectsEnabled = (value != 0);
+
+        if (fscanf_s(file, "%d", &value) == 1)
+            SetMusicVolume(value);
+
+        if (fscanf_s(file, "%d", &value) == 1)
+            SetEffectsVolume(value);
+
+        fclose(file);
+
     }
 
 

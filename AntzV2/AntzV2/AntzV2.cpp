@@ -308,11 +308,20 @@ void RenderBackBuffer() {
     {
         return;
     }
+
+    if (gOptions.IsVisible())
+    {
+        gOptions.Paint(gMemDC);
+        return;
+    }
+
     if (gAbout.IsVisible())
     {
         gAbout.Paint(gMemDC);
         return;
     }
+
+
 
     //1.Clear screen
     RECT rc = { 0, 0, gClientWidth, gClientHeight };
@@ -677,6 +686,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_LBUTTONDOWN:
     {
+        if (gOptions.IsVisible())
+        {
+            gOptions.HandleMouse(message, wParam, lParam);
+            return 0;
+        }
         if (gAbout.IsVisible())
         {
             if (gAbout.HandleMouse(message, wParam, lParam))
@@ -805,6 +819,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
     case WM_KEYDOWN:
     {
+        if (gOptions.IsVisible())
+        {
+            gOptions.HandleKey(message, wParam, lParam);
+            return 0;
+        }
         if (gAbout.IsVisible())
         {
             if (gAbout.HandleKey(message, wParam, lParam))
@@ -833,6 +852,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
 	case WM_MOUSEMOVE:
     {
+        if (gOptions.IsVisible())
+        {
+            gOptions.HandleMouse(message, wParam, lParam);
+            return 0;
+        }
         if (gAbout.IsVisible())
         {
             if (gAbout.HandleMouse(message, wParam, lParam))
@@ -843,7 +867,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         return 0;
     }
-
+    case WM_LBUTTONUP:
+    {
+        if (gOptions.IsVisible())
+        {
+            gOptions.HandleMouse(message, wParam, lParam);
+            return 0;
+        }
+        break;
+    }
     case WM_ERASEBKGND:
         return TRUE;
 

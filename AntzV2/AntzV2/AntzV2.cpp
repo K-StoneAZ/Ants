@@ -608,6 +608,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 OutputDebugStringW(L"Load Game selected\n");
                 LoadGameDialog(hWnd);
                 break;
+            case IDM_APP_OPTIONS:
+                gOptions.Show(hWnd);
+                InvalidateRect(hWnd, nullptr, FALSE);
+				break;
             case IDM_TUTORIAL:
 
                 if (gAppState != APP_GAME || gGame.CanShowAbout())

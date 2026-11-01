@@ -89,7 +89,17 @@ public:
         fclose(file);
 
     }
-
+    void Save(const wchar_t* filePath)
+    {
+        FILE* file = nullptr;
+        if (_wfopen_s(&file, filePath, L"w") != 0 || file == nullptr)
+            return;
+        fprintf(file, "%d\n", m_musicEnabled ? 1 : 0);
+        fprintf(file, "%d\n", m_effectsEnabled ? 1 : 0);
+        fprintf(file, "%d\n", m_musicVolume);
+        fprintf(file, "%d\n", m_effectsVolume);
+		fclose(file);
+    }
 
 };
 

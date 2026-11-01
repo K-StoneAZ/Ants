@@ -609,7 +609,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 LoadGameDialog(hWnd);
                 break;
             case IDM_APP_OPTIONS:
-                gOptions.Show(hWnd);
+                gOptions.Show(hWnd, gOptionsPath);
                 InvalidateRect(hWnd, nullptr, FALSE);
 				break;
             case IDM_TUTORIAL:

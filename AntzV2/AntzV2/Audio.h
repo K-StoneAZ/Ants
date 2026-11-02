@@ -120,6 +120,11 @@ public:
 
     void Shutdown()
     {
+        if (m_backgroundLoaded)
+        {
+            ma_sound_uninit(&m_background);
+            m_backgroundLoaded = false;
+		}
         if (m_initialized)
         {
             ma_engine_uninit(&m_engine);

@@ -208,6 +208,25 @@ void PlayGameSound(const char* filename)
 
     gAudio.PlayFile(soundPath);
 }
+void StartBackgroundMusic(const char* filename)
+{
+    if (!filename || filename[0] == '\0')
+        return;
+
+    char exePath[MAX_PATH] = {};
+    char musicPath[MAX_PATH] = {};
+
+    GetExeDirectory(exePath, MAX_PATH);
+
+    int result = sprintf_s(
+        musicPath, MAX_PATH, "%s%s", exePath, filename);
+
+    if (result < 0)
+        return;
+
+    gAudio.SetTitleScreen(true);
+    gAudio.Background(musicPath);
+}
 
 bool FileExists(const wchar_t* path)
 {
@@ -655,7 +674,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         gOptions.Load(gOptionsPath);
         gAudio.SetPreferences( gOptions.IsMusicEnabled(), gOptions.AreEffectsEnabled(),
             gOptions.GetMusicVolume(), gOptions.GetEffectsVolume());
-        gAudio.Initialize();
+        if (gAudio.Initialize())
+        {
+            StartBackgroundMusic("TitleMusic.wav");
+        }
         gSetup.Initialize(hWnd);
         gGame.Initialize(gMemDC);
         gGame.SetRepaintCallback(RepaintGame);
@@ -720,6 +742,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 gAppState = APP_SETUP;
             }
 
+            gAudio.SetTitleScreen(false);
             InvalidateRect(hWnd, nullptr, TRUE);
             return 0;
         }

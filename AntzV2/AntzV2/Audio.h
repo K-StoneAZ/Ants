@@ -6,11 +6,31 @@ class Audio
 private:
     ma_engine m_engine{};
     bool m_initialized = false;
+
+    ma_sound m_background{};
+    bool m_backgroundLoaded = false;
+    bool m_titleScreen = false;
+
     bool m_musicEnabled = true;
     bool m_effectsEnabled = true;
 
     int m_musicVolume = 70;
     int m_effectsVolume = 100;
+
+    void UpdateBackground()
+    {
+        if (!m_backgroundLoaded)
+            return;
+
+        bool shouldPlay = m_titleScreen || m_musicEnabled;
+
+        ma_sound_set_volume( &m_background, m_musicVolume / 100.0f);
+
+        if (shouldPlay)
+            ma_sound_start(&m_background);
+        else
+            ma_sound_stop(&m_background);
+    }
 
 public:
     bool Initialize()
@@ -33,6 +53,31 @@ public:
         return ma_engine_play_sound(&m_engine, filePath, nullptr) == MA_SUCCESS;
     }
 
+    bool Background(const char* filePath)
+    {
+        if (!m_initialized || !filePath)
+            return false;
+
+        if (m_backgroundLoaded)
+        {
+            ma_sound_uninit(&m_background);
+            m_backgroundLoaded = false;
+        }
+
+        if (ma_sound_init_from_file( &m_engine, filePath,
+            MA_SOUND_FLAG_LOOPING, nullptr, nullptr,
+            &m_background) != MA_SUCCESS)
+        {
+            return false;
+        }
+
+        m_backgroundLoaded = true;
+
+        UpdateBackground();
+
+        return true;
+    }
+
     void SetPreferences( bool musicEnabled, bool effectsEnabled,
         int musicVolume, int effectsVolume)
     {
@@ -45,6 +90,7 @@ public:
         m_effectsVolume = (effectsVolume < 0) ? 0 :
             (effectsVolume > 100) ? 100 : effectsVolume;
 
+        UpdateBackground();
     }
     bool MusicEnabled() const
     {
@@ -64,6 +110,12 @@ public:
     int GetEffectsVolume() const
     {
         return m_effectsVolume;
+    }
+
+    void SetTitleScreen(bool active)
+    {
+        m_titleScreen = active;
+        UpdateBackground();
     }
 
     void Shutdown()

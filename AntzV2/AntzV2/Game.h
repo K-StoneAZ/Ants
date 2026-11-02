@@ -927,14 +927,13 @@ void ClearBattle()
 
 void ApplyGrowth(int amount)
 {
+    PlaySound("Growth.wav");
     int row = m_players[m_activePlayer].trow;
     int col = m_players[m_activePlayer].tcol;
 
     int ants = m_field.getAnts(row, col);
 
         m_field.setAnts(row, col, ants + amount);
-
-        int newAnts = m_field.getAnts(row, col);
 
         m_players[m_activePlayer].sant -= amount;
 
@@ -957,6 +956,8 @@ void UpdateAttack()
     }
     else
     {
+        // One battle sound per roll.
+        PlaySound("BattleRound.wav");
         // One battle tick here
         player.attackRoll = 1 + (gRNG() % 100) + bonus;
             if (player.attackRoll > 100) { player.attackRoll = 100; }
@@ -979,6 +980,7 @@ void UpdateAttack()
         if (player.sant <= 0)
         {
             // attack failed
+            PlaySound("AttackFailed.wav");
             StopTimer(Timer::Battle);
             m_renderer.SetBattleActive(false);
             m_dialog.m_mode = DIALOG_MOVE;
@@ -1001,6 +1003,7 @@ void UpdateAttack()
         if (player.tant <= 0)
         {
             // attack succeeded
+            PlaySound("AttackSuccess.wav");
             // Capture target
             m_field.setOwner(player.trow, player.tcol, m_activePlayer);
             m_field.setAnts(player.trow, player.tcol, player.sant);
@@ -1074,6 +1077,8 @@ void UpdateAttack()
 
 void ApplyMove(int amount)
 {
+    PlaySound("Move.wav");
+
     PlayerData& player = m_players[m_activePlayer];
 
     m_field.setAnts(

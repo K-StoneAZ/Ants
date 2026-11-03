@@ -980,7 +980,7 @@ void UpdateAttack()
         if (player.sant <= 0)
         {
             // attack failed
-            PlaySound("AttackFailed.wav");
+            PlaySound("Failed.wav");
             StopTimer(Timer::Battle);
             m_renderer.SetBattleActive(false);
             m_dialog.m_mode = DIALOG_MOVE;

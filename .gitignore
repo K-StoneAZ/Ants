@@ -362,14 +362,8 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Keep the current AntzV2 executable in the repository
 # Keep the current AntzV2 executable and runtime assets
 !AntzV2/x64/
 AntzV2/x64/*
 !AntzV2/x64/Debug/
-AntzV2/x64/Debug/*
-!AntzV2/x64/Debug/AntzV2.exe
-!AntzV2/x64/Debug/*.antz
-!AntzV2/x64/Debug/*.bmp
-!AntzV2/x64/Debug/*.wav
-!AntzV2/x64/Debug/*.ogg
+

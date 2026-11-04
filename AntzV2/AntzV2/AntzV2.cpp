@@ -42,6 +42,7 @@ int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 std::mt19937 gRNG;
 wchar_t gOptionsPath[MAX_PATH] = {};
+char gExePath[MAX_PATH]{};
 
 Setup gSetup;
 Game gGame;
@@ -54,6 +55,7 @@ AppState gAppState = APP_TITLE;
 HBITMAP gTitleBmp = nullptr;
 HDC gTitleDC = nullptr;
 HBITMAP gSetupBackgroundBmp = nullptr;
+
 bool ConfirmQuit(HWND hWnd)
 {
     return MessageBoxW(
@@ -190,6 +192,7 @@ void GetExeDirectory(char* outPath, int size)
 
     WideCharToMultiByte( CP_UTF8, 0, widePath, -1,
         outPath, size, nullptr, nullptr );
+
 }
 void PlayGameSound(const char* filename)
 {
@@ -206,7 +209,7 @@ void PlayGameSound(const char* filename)
     if (result < 0)
         return;
 
-    gAudio.PlayFile(soundPath);
+    //gAudio.PlayFile(soundPath);
 }
 void StartBackgroundMusic(const char* filename)
 {
@@ -392,6 +395,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     LoadStringW(hInstance, IDC_ANTZV2, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
+    // Prepare executable directory for Audio
+    GetExeDirectory(gExePath, MAX_PATH);
     // Prepare application options path
     GetExeDirectory(gOptionsPath, MAX_PATH);
     wcscat_s(gOptionsPath, L"AntzV2.ini");
@@ -674,7 +679,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         gOptions.Load(gOptionsPath);
         gAudio.SetPreferences( gOptions.IsMusicEnabled(), gOptions.AreEffectsEnabled(),
             gOptions.GetMusicVolume(), gOptions.GetEffectsVolume());
-        if (gAudio.Initialize())
+        if (gAudio.Initialize(gExePath))
         {
             StartBackgroundMusic("TitleMusic.wav");
         }

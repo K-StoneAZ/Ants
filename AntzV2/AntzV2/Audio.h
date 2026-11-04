@@ -28,6 +28,8 @@ private:
 
     int m_musicVolume = 70;
     int m_effectsVolume = 100;
+    std::string m_path = "";
+
 
     void UpdateBackground()
     {
@@ -45,8 +47,10 @@ private:
     }
 
 public:
-    bool Initialize()
+    bool Initialize(std::string path)
     {
+		m_path = path;
+
         if (m_initialized)
             return true;
 

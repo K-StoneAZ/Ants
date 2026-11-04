@@ -1,9 +1,21 @@
 #pragma once
 #include "miniaudio.h"
+#include <memory>
+#include <string>
+#include <vector>
+#include <algorithm>
 
 class Audio
 {
 private:
+    struct LoadSound
+    {
+        ma_sound sound{};
+        std::string filename;
+        bool isBackground = false;
+    };
+    std::vector<std::unique_ptr<LoadSound>> m_loadedSounds;
+
     ma_engine m_engine{};
     bool m_initialized = false;
 
@@ -45,13 +57,61 @@ public:
         return true;
     }
 
-    bool PlayFile(const char* filePath)
+    bool Load(const char* filePath, bool isBackground = false)
     {
-        if (!m_initialized)
+        if (!m_initialized || !filePath)
             return false;
 
-        return ma_engine_play_sound(&m_engine, filePath, nullptr) == MA_SUCCESS;
+        auto it = std::find_if(m_loadedSounds.begin(), m_loadedSounds.end(),
+            [filePath](const auto& loaded)
+            {
+                return loaded->filename == filePath;
+            });
+
+        if (it != m_loadedSounds.end())
+            return true;
+
+        auto loaded = std::make_unique<LoadSound>();
+
+        if (ma_sound_init_from_file(&m_engine, filePath, 0,
+            nullptr, nullptr, &loaded->sound) != MA_SUCCESS)
+        {
+            return false;
+        }
+
+        loaded->filename = filePath;
+        loaded->isBackground = isBackground;
+
+        m_loadedSounds.push_back(std::move(loaded));
+
+        return true;
     }
+
+/*    bool PlayFile(const char* filePath)
+    {
+        if (!m_initialized || !filePath)
+            return false;
+
+        auto active = std::make_unique<ActiveSound>();
+
+        if (ma_sound_init_from_file(&m_engine, filePath, 0,
+            nullptr, nullptr, &active->sound) != MA_SUCCESS)
+        {
+            return false;
+        }
+ 
+        active->filename = filePath;
+
+        if (ma_sound_start(&active->sound) != MA_SUCCESS)
+        {
+            ma_sound_uninit(&active->sound);
+            return false;
+        }
+
+        m_activeSounds.push_back(std::move(active));
+
+        return true;
+   }*/
 
     bool Background(const char* filePath)
     {
@@ -120,6 +180,13 @@ public:
 
     void Shutdown()
     {
+        for (auto& loaded : m_loadedSounds)
+        {
+            ma_sound_uninit(&loaded->sound);
+        }
+
+        m_loadedSounds.clear();
+
         if (m_backgroundLoaded)
         {
             ma_sound_uninit(&m_background);

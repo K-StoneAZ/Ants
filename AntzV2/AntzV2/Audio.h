@@ -77,85 +77,85 @@ public:
         return true;
     }
 
-    bool Load(const char* filePath, bool isBackground = false)
+    bool Load()
     {
-        if (!m_initialized || !filePath)
+        if (!m_initialized || m_path.empty())
             return false;
 
-        auto it = std::find_if(m_loadedSounds.begin(), m_loadedSounds.end(),
-            [filePath](const auto& loaded)
-            {
-                return loaded->filename == filePath;
-            });
-
-        if (it != m_loadedSounds.end())
-            return true;
-
-        auto loaded = std::make_unique<LoadSound>();
-
-        if (ma_sound_init_from_file(&m_engine, filePath, 0,
-            nullptr, nullptr, &loaded->sound) != MA_SUCCESS)
+        for (const auto& info : soundInventory)
         {
-            return false;
+            auto it = std::find_if(m_loadedSounds.begin(), m_loadedSounds.end(),
+                [&info](const auto& loaded)
+                {
+                    return loaded->filename == info.fname;
+                });
+
+            if (it != m_loadedSounds.end())
+                continue;
+
+            std::string filePath = m_path + info.fname;
+
+            auto loaded = std::make_unique<LoadSound>();
+
+            if (ma_sound_init_from_file(&m_engine, filePath.c_str(), 0,
+                nullptr, nullptr, &loaded->sound) != MA_SUCCESS)
+            {
+                return false;
+            }
+
+            loaded->filename = info.fname;
+            loaded->isBackground = info.type;
+
+            m_loadedSounds.push_back(std::move(loaded));
         }
-
-        loaded->filename = filePath;
-        loaded->isBackground = isBackground;
-
-        m_loadedSounds.push_back(std::move(loaded));
 
         return true;
     }
 
-/*    bool PlayFile(const char* filePath)
+    bool PlayFile(const char* fileName)
     {
-        if (!m_initialized || !filePath)
+        if (!m_initialized || !fileName)
             return false;
 
-        auto active = std::make_unique<ActiveSound>();
+        auto it = std::find_if(m_loadedSounds.begin(), m_loadedSounds.end(),
+            [fileName](const auto& loaded)
+            {
+                return loaded->filename == fileName;
+            });
 
-        if (ma_sound_init_from_file(&m_engine, filePath, 0,
-            nullptr, nullptr, &active->sound) != MA_SUCCESS)
-        {
+        if (it == m_loadedSounds.end())
             return false;
-        }
- 
-        active->filename = filePath;
 
-        if (ma_sound_start(&active->sound) != MA_SUCCESS)
-        {
-            ma_sound_uninit(&active->sound);
-            return false;
-        }
+        if (!m_effectsEnabled)
+            return true;
 
-        m_activeSounds.push_back(std::move(active));
+        ma_sound_set_volume(&(*it)->sound, m_effectsVolume / 100.0f);
 
-        return true;
-   }*/
+        return ma_sound_start(&(*it)->sound) == MA_SUCCESS;
+    }
 
-    bool Background(const char* filePath)
+    bool Background(const char* fileName)
     {
-        if (!m_initialized || !filePath)
+        if (!m_initialized || !fileName)
             return false;
 
-        if (m_backgroundLoaded)
-        {
-            ma_sound_uninit(&m_background);
-            m_backgroundLoaded = false;
-        }
+        auto it = std::find_if(m_loadedSounds.begin(), m_loadedSounds.end(),
+            [fileName](const auto& loaded)
+            {
+                return loaded->filename == fileName;
+            });
 
-        if (ma_sound_init_from_file( &m_engine, filePath,
-            MA_SOUND_FLAG_LOOPING, nullptr, nullptr,
-            &m_background) != MA_SUCCESS)
-        {
+        if (it == m_loadedSounds.end())
             return false;
-        }
 
-        m_backgroundLoaded = true;
+        ma_sound_set_looping(&(*it)->sound, MA_TRUE);
 
-        UpdateBackground();
+        ma_sound_set_volume(&(*it)->sound, m_musicVolume / 100.0f);
 
-        return true;
+        if (!m_titleScreen && !m_musicEnabled)
+            return true;
+
+        return ma_sound_start(&(*it)->sound) == MA_SUCCESS;
     }
 
     void SetPreferences( bool musicEnabled, bool effectsEnabled,

@@ -8,6 +8,22 @@
 class Audio
 {
 private:
+    struct SoundInfo
+    {
+        std::string fname;
+        bool type;
+    };
+
+    const SoundInfo soundInventory[6] =
+    {
+        { "Alarm01.wav",    false },
+        { "Failed.wav",     false },
+        { "Growth.wav",     false },
+        { "Marching.wav",   false },
+        { "Success.wav",    false },
+        { "TitleMusic.wav", true  }
+    };
+
     struct LoadSound
     {
         ma_sound sound{};

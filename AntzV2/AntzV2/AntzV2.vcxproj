@@ -156,6 +156,7 @@
     <Media Include="..\x64\Debug\Failed.wav" />
     <Media Include="..\x64\Debug\Growth.wav" />
     <Media Include="..\x64\Debug\Marching.wav" />
+    <Media Include="..\x64\Debug\Success.wav" />
     <Media Include="..\x64\Debug\TitleMusic.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

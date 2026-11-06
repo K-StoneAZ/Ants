@@ -216,19 +216,8 @@ void StartBackgroundMusic(const char* filename)
     if (!filename || filename[0] == '\0')
         return;
 
-    char exePath[MAX_PATH] = {};
-    char musicPath[MAX_PATH] = {};
-
-    GetExeDirectory(exePath, MAX_PATH);
-
-    int result = sprintf_s(
-        musicPath, MAX_PATH, "%s%s", exePath, filename);
-
-    if (result < 0)
-        return;
-
     gAudio.SetTitleScreen(true);
-    gAudio.Background(musicPath);
+    gAudio.Background(filename);
 }
 
 bool FileExists(const wchar_t* path)
@@ -681,8 +670,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             gOptions.GetMusicVolume(), gOptions.GetEffectsVolume());
         if (gAudio.Initialize(gExePath))
         {
-            StartBackgroundMusic("TitleMusic.wav");
+            OutputDebugStringA("One or more audio files failed to load.\n");
         }
+        StartBackgroundMusic("TitleMusic.wav");
         gSetup.Initialize(hWnd);
         gGame.Initialize(gMemDC);
         gGame.SetRepaintCallback(RepaintGame);

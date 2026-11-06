@@ -16,11 +16,11 @@ private:
 
     const SoundInfo soundInventory[6] =
     {
-        { "Alarm01.wav",    false },
         { "Failed.wav",     false },
         { "Growth.wav",     false },
         { "Marching.wav",   false },
         { "Success.wav",    false },
+        { "BattleRound.wav",true  },
         { "TitleMusic.wav", true  }
     };
 

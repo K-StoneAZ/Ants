@@ -131,7 +131,7 @@ public:
                 return loaded->filename == fileName;
             });
 
-        if (it == m_loadedSounds.end())
+        if (it == m_loadedSounds.end() || !(*it)->isLoaded)
             return false;
 
         if (!m_effectsEnabled)
@@ -153,7 +153,7 @@ public:
                 return loaded->filename == fileName;
             });
 
-        if (it == m_loadedSounds.end())
+        if (it == m_loadedSounds.end() || !(*it)->isLoaded)
             return false;
 
         ma_sound_set_looping(&(*it)->sound, MA_TRUE);

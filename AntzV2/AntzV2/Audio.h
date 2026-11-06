@@ -29,6 +29,7 @@ private:
         ma_sound sound{};
         std::string filename;
         bool isBackground = false;
+        bool isLoaded = false;
     };
     std::vector<std::unique_ptr<LoadSound>> m_loadedSounds;
 
@@ -74,13 +75,15 @@ public:
             return false;
 
         m_initialized = true;
-        return true;
+        return Load();
     }
 
     bool Load()
     {
         if (!m_initialized || m_path.empty())
             return false;
+
+        bool allLoaded = true;
 
         for (const auto& info : soundInventory)
         {
@@ -93,23 +96,28 @@ public:
             if (it != m_loadedSounds.end())
                 continue;
 
-            std::string filePath = m_path + info.fname;
-
             auto loaded = std::make_unique<LoadSound>();
-
-            if (ma_sound_init_from_file(&m_engine, filePath.c_str(), 0,
-                nullptr, nullptr, &loaded->sound) != MA_SUCCESS)
-            {
-                return false;
-            }
-
+            
             loaded->filename = info.fname;
             loaded->isBackground = info.type;
+            loaded->isLoaded = false;
+
+            std::string filePath = m_path + info.fname;
+
+            if (ma_sound_init_from_file(&m_engine, filePath.c_str(), 0,
+                nullptr, nullptr, &loaded->sound) == MA_SUCCESS)
+            {
+                loaded->isLoaded = true;
+            }
+            else
+            {
+                allLoaded = false;
+            }
 
             m_loadedSounds.push_back(std::move(loaded));
         }
 
-        return true;
+        return allLoaded;
     }
 
     bool PlayFile(const char* fileName)

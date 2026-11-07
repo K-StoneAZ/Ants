@@ -11,24 +11,26 @@ private:
     struct SoundInfo
     {
         std::string fname;
-        bool type;
+        bool type = false;
+		bool loop = false;
     };
 
     const SoundInfo soundInventory[6] =
     {
-        { "Failed.wav",     false },
-        { "Growth.wav",     false },
-        { "Marching.wav",   false },
-        { "Success.wav",    false },
-        { "BattleRound.wav",true  },
-        { "TitleMusic.wav", true  }
+        { "Failed.wav",     false, false },
+        { "Growth.wav",     false, false },
+        { "Marching.wav",   false, false },
+        { "Success.wav",    false, false },
+        { "BattleRound.wav",false, true  },
+        { "TitleMusic.wav", true, true  }
     };
 
     struct LoadSound
     {
         ma_sound sound{};
         std::string filename;
-        bool isBackground = false;
+        bool type = false;
+        bool loop = false;
         bool isLoaded = false;
     };
     std::vector<std::unique_ptr<LoadSound>> m_loadedSounds;
@@ -36,8 +38,6 @@ private:
     ma_engine m_engine{};
     bool m_initialized = false;
 
-    ma_sound m_background{};
-    bool m_backgroundLoaded = false;
     bool m_titleScreen = false;
 
     bool m_musicEnabled = true;
@@ -46,22 +46,6 @@ private:
     int m_musicVolume = 70;
     int m_effectsVolume = 100;
     std::string m_path = "";
-
-
-    void UpdateBackground()
-    {
-        if (!m_backgroundLoaded)
-            return;
-
-        bool shouldPlay = m_titleScreen || m_musicEnabled;
-
-        ma_sound_set_volume( &m_background, m_musicVolume / 100.0f);
-
-        if (shouldPlay)
-            ma_sound_start(&m_background);
-        else
-            ma_sound_stop(&m_background);
-    }
 
 public:
     bool Initialize(std::string path)
@@ -99,7 +83,8 @@ public:
             auto loaded = std::make_unique<LoadSound>();
             
             loaded->filename = info.fname;
-            loaded->isBackground = info.type;
+            loaded->type = info.type;
+            loaded->loop = info.loop;
             loaded->isLoaded = false;
 
             std::string filePath = m_path + info.fname;
@@ -134,36 +119,31 @@ public:
         if (it == m_loadedSounds.end() || !(*it)->isLoaded)
             return false;
 
-        if (!m_effectsEnabled)
+        LoadSound& loaded = *(*it);
+
+        // Determine which application settings apply.
+        bool enabled = loaded.type ? m_musicEnabled : m_effectsEnabled;
+
+        // Title music always plays on the title screen.
+        if (loaded.filename == "TitleMusic.wav" && m_titleScreen)
+            enabled = true;
+
+        if (!enabled)
             return true;
 
-        ma_sound_set_volume(&(*it)->sound, m_effectsVolume / 100.0f);
+        // Apply the appropriate volume.
+        int volume = loaded.type ? m_musicVolume : m_effectsVolume;
+        if (loaded.filename == "TitleMusic.wav" && m_titleScreen)
+            volume = 100;
 
-        return ma_sound_start(&(*it)->sound) == MA_SUCCESS;
-    }
+        ma_sound_set_volume(
+            &loaded.sound, volume / 100.0f);
 
-    bool Background(const char* fileName)
-    {
-        if (!m_initialized || !fileName)
-            return false;
+        // Apply the inventory's looping setting.
+        ma_sound_set_looping(
+            &loaded.sound, loaded.loop ? MA_TRUE : MA_FALSE);
 
-        auto it = std::find_if(m_loadedSounds.begin(), m_loadedSounds.end(),
-            [fileName](const auto& loaded)
-            {
-                return loaded->filename == fileName;
-            });
-
-        if (it == m_loadedSounds.end() || !(*it)->isLoaded)
-            return false;
-
-        ma_sound_set_looping(&(*it)->sound, MA_TRUE);
-
-        ma_sound_set_volume(&(*it)->sound, m_musicVolume / 100.0f);
-
-        if (!m_titleScreen && !m_musicEnabled)
-            return true;
-
-        return ma_sound_start(&(*it)->sound) == MA_SUCCESS;
+        return ma_sound_start(&loaded.sound) == MA_SUCCESS;
     }
 
     void SetPreferences( bool musicEnabled, bool effectsEnabled,
@@ -177,8 +157,6 @@ public:
 
         m_effectsVolume = (effectsVolume < 0) ? 0 :
             (effectsVolume > 100) ? 100 : effectsVolume;
-
-        UpdateBackground();
     }
     bool MusicEnabled() const
     {
@@ -203,7 +181,6 @@ public:
     void SetTitleScreen(bool active)
     {
         m_titleScreen = active;
-        UpdateBackground();
     }
 
     void Shutdown()
@@ -215,11 +192,6 @@ public:
 
         m_loadedSounds.clear();
 
-        if (m_backgroundLoaded)
-        {
-            ma_sound_uninit(&m_background);
-            m_backgroundLoaded = false;
-		}
         if (m_initialized)
         {
             ma_engine_uninit(&m_engine);

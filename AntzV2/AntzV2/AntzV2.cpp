@@ -217,7 +217,7 @@ void StartBackgroundMusic(const char* filename)
         return;
 
     gAudio.SetTitleScreen(true);
-    gAudio.Background(filename);
+    gAudio.PlayFile(filename);
 }
 
 bool FileExists(const wchar_t* path)
@@ -668,7 +668,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         gOptions.Load(gOptionsPath);
         gAudio.SetPreferences( gOptions.IsMusicEnabled(), gOptions.AreEffectsEnabled(),
             gOptions.GetMusicVolume(), gOptions.GetEffectsVolume());
-        if (gAudio.Initialize(gExePath))
+        if (!gAudio.Initialize(gExePath))
         {
             OutputDebugStringA("One or more audio files failed to load.\n");
         }

@@ -971,6 +971,8 @@ void UpdateAttack()
 
     if (m_field.getOwner(player.trow, player.tcol) == 0)
     {
+        // attack succeeded
+        PlaySound("Success.wav");
         // Automatic capture
         m_field.setOwner(player.trow, player.tcol, m_activePlayer);
         m_field.setAnts(player.trow, player.tcol, player.sant);
@@ -1099,7 +1101,7 @@ void UpdateAttack()
 
 void ApplyMove(int amount)
 {
-    PlaySound("Growth.wav");
+    PlaySound("Marching.wav");
 
     PlayerData& player = m_players[m_activePlayer];
 

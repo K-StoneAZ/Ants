@@ -17,6 +17,7 @@ using TimerCallback = void(*)(Timer, GameSpeed);
 using GameWinCallback = void(*)(const GameResult&);
 using RecoverySaveCallback = void(*)();
 using SoundCallback = void(*)(const char*);
+using SoundStopCallback = void(*)(const char*);
 
 class Game
 {
@@ -61,6 +62,7 @@ private:
     GameWinCallback m_gameWin = nullptr;
     RecoverySaveCallback m_recoverySave = nullptr;
     SoundCallback m_sound = nullptr;
+    SoundStopCallback m_stopSound = nullptr;
 
     int m_hoverRow = -1;
     int m_hoverCol = -1;
@@ -181,6 +183,19 @@ public:
             m_sound(filename);
         }
     }
+    void SetStopSoundCallback(SoundStopCallback callback)
+    {
+        m_stopSound = callback;
+    }
+
+    void StopSound(const char* filename)
+    {
+        if (m_stopSound)
+        {
+            m_stopSound(filename);
+        }
+    }
+
 
     void ChangeSpeed()
     {
@@ -559,6 +574,10 @@ void UpdateAIturn()
         {
         case 0:
 
+        // One battle sound
+        StopSound("TitleMusic.wav");
+        PlaySound("BattleRound.wav");
+
         if (m_config.m_Difficulty > 2 || player.success)
         {
             m_aiC.ExAttack(m_field, m_activePlayer);
@@ -665,7 +684,8 @@ void UpdateAIturn()
         {
 
         case 0:
-
+            StopSound("BattleRound.wav");
+            PlaySound("TitleMusic.wav");
             m_aiC.Move(m_field, m_activePlayer);
 
             if (m_aiC.GetSourceRow() == -1)
@@ -806,7 +826,9 @@ void UpdateTurn()
             }
             return;
         case T_ATTACK:
-
+                // One battle sound
+                StopSound("TitleMusic.wav");
+                PlaySound("BattleRound.wav");
                 m_dialog.m_mode = DIALOG_ATTACK;
                 m_field.ClearAllVisualModes();
                 m_field.SetPlayerVisualMode(m_activePlayer);
@@ -817,7 +839,8 @@ void UpdateTurn()
                 RequestRepaint();
             return;
         case T_MOVE:
-
+                StopSound("BattleRound.wav");
+                PlaySound("TitleMusic.wav");
                 m_dialog.m_mode = DIALOG_MOVE;
 				ClearBattle();
                 m_field.ClearAllVisualModes();
@@ -956,8 +979,7 @@ void UpdateAttack()
     }
     else
     {
-        // One battle sound per roll.
-        PlaySound("BattleRound.wav");
+
         // One battle tick here
         player.attackRoll = 1 + (gRNG() % 100) + bonus;
             if (player.attackRoll > 100) { player.attackRoll = 100; }

@@ -211,6 +211,13 @@ void PlayGameSound(const char* filename)
 
     //gAudio.PlayFile(soundPath);
 }
+void StopGameSound(const char* filename)
+{
+    if (!filename || filename[0] == '\0')
+        return;
+
+    gAudio.StopFile(filename);
+}
 void StartBackgroundMusic(const char* filename)
 {
     if (!filename || filename[0] == '\0')
@@ -681,6 +688,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		gGame.SetGameWinCallback(GameWin);
         gGame.SetRecoverySaveCallback(SaveRecoveryCheckpoint);
         gGame.SetSoundCallback(PlayGameSound);
+        gGame.SetStopSoundCallback(StopGameSound);
         return 0;
     }
 

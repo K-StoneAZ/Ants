@@ -143,7 +143,28 @@ public:
         ma_sound_set_looping(
             &loaded.sound, loaded.loop ? MA_TRUE : MA_FALSE);
 
+        // Don't restart a looping sound that's already playing.
+        if (loaded.loop && ma_sound_is_playing(&loaded.sound))
+            return true;
+
         return ma_sound_start(&loaded.sound) == MA_SUCCESS;
+    }
+
+    bool StopFile(const char* fileName)
+    {
+        if (!m_initialized || !fileName)
+            return false;
+
+        auto it = std::find_if(m_loadedSounds.begin(), m_loadedSounds.end(),
+            [fileName](const auto& loaded)
+            {
+                return loaded->filename == fileName;
+            });
+
+        if (it == m_loadedSounds.end() || !(*it)->isLoaded)
+            return false;
+
+        return ma_sound_stop(&(*it)->sound) == MA_SUCCESS;
     }
 
     void SetPreferences( bool musicEnabled, bool effectsEnabled,

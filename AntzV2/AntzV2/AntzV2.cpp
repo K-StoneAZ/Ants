@@ -199,17 +199,7 @@ void PlayGameSound(const char* filename)
     if (!filename || filename[0] == '\0')
         return;
 
-    char exePath[MAX_PATH] = {};
-    char soundPath[MAX_PATH] = {};
-
-    GetExeDirectory(exePath, MAX_PATH);
-
-    int result = sprintf_s( soundPath, MAX_PATH, "%s%s", exePath, filename);
-
-    if (result < 0)
-        return;
-
-    //gAudio.PlayFile(soundPath);
+    gAudio.PlayFile(filename);
 }
 void StopGameSound(const char* filename)
 {

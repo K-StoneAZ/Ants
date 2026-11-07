@@ -167,9 +167,14 @@ public:
         return ma_sound_stop(&(*it)->sound) == MA_SUCCESS;
     }
 
-    void SetPreferences( bool musicEnabled, bool effectsEnabled,
+    void SetPreferences(bool musicEnabled, bool effectsEnabled,
         int musicVolume, int effectsVolume)
     {
+        // Save current preferences for comparison.
+        bool oldMusicEnabled = m_musicEnabled;
+        bool oldEffectsEnabled = m_effectsEnabled;
+
+        // Update preferences.
         m_musicEnabled = musicEnabled;
         m_effectsEnabled = effectsEnabled;
 
@@ -178,6 +183,37 @@ public:
 
         m_effectsVolume = (effectsVolume < 0) ? 0 :
             (effectsVolume > 100) ? 100 : effectsVolume;
+
+        // Stop currently playing sounds if their category is disabled.
+        for (auto& loaded : m_loadedSounds)
+        {
+            if (!loaded->isLoaded || !ma_sound_is_playing(&loaded->sound))
+                continue;
+
+            bool enabled = loaded->type ? m_musicEnabled : m_effectsEnabled;
+
+            // Title music is exempt from the music preference on the title screen.
+            if (loaded->filename == "TitleMusic.wav" && m_titleScreen)
+                enabled = true;
+
+            if (!enabled)
+            {
+                ma_sound_stop(&loaded->sound);
+                continue;
+            }
+
+            // Apply the updated volume to sounds that remain enabled.
+            int volume = loaded->type ? m_musicVolume : m_effectsVolume;
+
+            if (loaded->filename == "TitleMusic.wav" && m_titleScreen)
+                volume = 100;
+
+            ma_sound_set_volume(&loaded->sound, volume / 100.0f);
+        }
+
+        // Restart title/background music when music is re-enabled.
+        if (!oldMusicEnabled && m_musicEnabled && !m_titleScreen)
+            PlayFile("TitleMusic.wav");
     }
     bool MusicEnabled() const
     {

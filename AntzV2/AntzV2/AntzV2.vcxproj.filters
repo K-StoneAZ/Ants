@@ -107,5 +107,8 @@
     <Media Include="..\x64\Debug\BattleRound.wav">
       <Filter>Resource Files</Filter>
     </Media>
+    <Media Include="..\x64\Debug\Error.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>

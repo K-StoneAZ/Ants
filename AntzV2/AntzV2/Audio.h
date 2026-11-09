@@ -17,6 +17,7 @@ private:
 
     const SoundInfo soundInventory[6] =
     {
+        { "Error.wav",      false, false },
         { "Failed.wav",     false, false },
         { "Growth.wav",     false, false },
         { "Marching.wav",   false, false },

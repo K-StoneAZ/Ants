@@ -1149,6 +1149,7 @@ void HandleGrowthClick(ClickType click, int row = -1, int col = -1)
         if (!m_players[m_activePlayer].selectT)
         {
             m_error = "Select a target cell.";
+            PlaySound("Error1.wav");
             RequestRepaint();
             return;
         }
@@ -1315,6 +1316,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (!player.selectS)
             {
                 m_error = "Select an attack source.";
+                PlaySound("Error1.wav");
                 RequestRepaint();
                 return;
             }
@@ -1322,6 +1324,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (!player.selectT)
             {
                 m_error = "Select an attack target.";
+                PlaySound("Error1.wav");
                 RequestRepaint();
                 return;
             }
@@ -1505,6 +1508,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (!player.selectS)
             {
                 m_error = "Select movement source.";
+                PlaySound("Error1.wav");
                 RequestRepaint();
                 return;
             }

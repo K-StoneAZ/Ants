@@ -1123,6 +1123,7 @@ void HandleGrowthClick(ClickType click, int row = -1, int col = -1)
         if (m_field.getOwner(row, col) != m_activePlayer)
         {
             m_error = "That cell is not yours.";
+            PlaySound("Error.wav");
             RequestRepaint();
 
             return;
@@ -1160,12 +1161,14 @@ void HandleGrowthClick(ClickType click, int row = -1, int col = -1)
         if (amount <= 0)
         {
             m_error = "Growth amount must be greater than zero.";
+            PlaySound("Error.wav");
             RequestRepaint();
             return;
         }
         if (amount > m_players[m_activePlayer].sant)
         {
             m_error = "Not enough ants available.";
+            PlaySound("Error.wav");
             RequestRepaint();
             return;
         }    
@@ -1233,6 +1236,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (m_field.getOwner(row, col) != m_activePlayer)
             {
                 m_error = "That cell is not yours.";
+                PlaySound("Error.wav");
                 RequestRepaint();
                 return;
             }
@@ -1240,6 +1244,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (m_field.getAnts(row, col) <= 1)
             {
                 m_error = "Not enough ants to attack.";
+                PlaySound("Error.wav");
                 RequestRepaint();
                 return;
             }
@@ -1278,12 +1283,14 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (row == player.srow && col == player.scol)
             {
                 m_error = "Cannot attack yourself.";
+                PlaySound("Error.wav");
                 RequestRepaint();
                 return;
             }
             if (m_field.GetCell(row, col).visual != Field::V_HOVER)
             {
                 m_error = "Invalid Cell!";
+                PlaySound("Error.wav");
                 RequestRepaint();
                 return;
             }
@@ -1331,6 +1338,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (amount <= 0)
             {
                 m_error = "Attack amount must be greater than zero.";
+                PlaySound("Error.wav");
                 RequestRepaint();
                 return;
             }
@@ -1338,6 +1346,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (amount > player.sant)
             {
                 m_error = "Not enough ants available.";
+                PlaySound("Error.wav");
                 RequestRepaint();
                 return;
             }
@@ -1417,6 +1426,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
                 if (m_field.getOwner(row, col) != m_activePlayer)
                 {
                     m_error = "That cell is not yours.";
+                    PlaySound("Error.wav");
                     RequestRepaint();
                     return;
                 }
@@ -1424,6 +1434,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
                 if (m_field.getAnts(row, col) <= 1)
                 {
                     m_error = "Not enough ants to move.";
+                    PlaySound("Error.wav");
                     RequestRepaint();
                     return;
                 }
@@ -1462,12 +1473,14 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
                 if (row == player.srow && col == player.scol)
                 {
                     m_error = "Cannot move to source cell.";
+                    PlaySound("Error.wav");
                     RequestRepaint();
                     return;
                 }
                 if (m_field.GetCell(row, col).visual != Field::V_HOVER)
                 {
                     m_error = "Invalid Cell!";
+                    PlaySound("Error.wav");
                     RequestRepaint();
                     return;
                 }
@@ -1515,6 +1528,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (amount <= 0)
             {
                 m_error = "Move amount must be greater than zero.";
+                PlaySound("Error.wav");
                 RequestRepaint();
                 return;
             }
@@ -1522,6 +1536,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (amount > player.sant)
             {
                 m_error = "Not enough ants available.";
+                PlaySound("Error.wav");
                 RequestRepaint();
                 return;
             }

@@ -1819,6 +1819,7 @@ void OnChar(char ch)
  void Render()
     {
         m_renderer.Render(m_field, m_players, m_dialog, GetPlayer(),
-            m_antBox, m_error, m_gameSpeed);
+            m_antBox, m_error, m_gameSpeed,
+            m_config.m_AttackPerTurn - m_successfulCount);
     }
 };

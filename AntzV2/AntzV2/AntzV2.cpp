@@ -736,6 +736,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
 
             gAudio.SetTitleScreen(false);
+            gAudio.SetPreferences( gOptions.IsMusicEnabled(), gOptions.AreEffectsEnabled(),
+                gOptions.GetMusicVolume(), gOptions.GetEffectsVolume());
             InvalidateRect(hWnd, nullptr, TRUE);
             return 0;
         }

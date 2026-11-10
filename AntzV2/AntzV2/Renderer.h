@@ -50,6 +50,7 @@ private:
     int antsAvailable = 0;
     int antsCommitted = 0;
     int m_activePlayer = 1;
+	int m_attackCount = 0;
     bool m_battleActive = false;
 
     // Player colors
@@ -194,8 +195,9 @@ public:
     }
     void Render(const Field& m_field, const std::vector<PlayerData>& m_players,
         const DialogState& dialog, int m_activePlayer, TextBox& antBox,
-        std::string& error, GameSpeed gameSpeed)
+        std::string& error, GameSpeed gameSpeed, int attackCount)
     {
+		m_attackCount = attackCount;
         RenderField(m_field, m_players, m_activePlayer);
         RenderStatus(m_players);
         RenderHUD(m_players, dialog, m_activePlayer, gameSpeed);
@@ -486,6 +488,21 @@ public:
         DrawTextA(m_hdc, "Battle", -1, &titleRect,
             DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
+        // Attacks remaining
+        RECT attackCountRect = {
+            frame.left + 15, frame.top + 48,
+            frame.right - 15, frame.top + 73
+        };
+
+        SetTextColor(m_hdc, m_antColor2);
+        SelectObject(m_hdc, m_hudTextFont);
+
+        std::string attackText =
+            "Attacks Remaining: " + std::to_string(m_attackCount);
+
+        DrawTextA(m_hdc, attackText.c_str(), -1, &attackCountRect,
+            DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
         // Combat panes
         int titleY = frame.top + 10;
         int playerY = titleY + 45;
@@ -538,8 +555,7 @@ public:
         // Battle information
         SelectObject(m_hdc, m_hudTextFont);
 
-        std::string attackText =
-            "Roll: " + std::to_string(players[thisPlayer].attackRoll);
+        attackText = "Roll: " + std::to_string(players[thisPlayer].attackRoll);
 
         std::string defenseText =
             "Roll: " + std::to_string(players[thisPlayer].defenseRoll);

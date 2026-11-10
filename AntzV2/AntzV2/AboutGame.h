@@ -1016,7 +1016,7 @@ public:
 	void Render() 
 	{
 		m_renderer.Render(m_field, m_players, m_dialog,
-			m_activePlayer, m_antBox, m_error, m_gameSpeed);
+			m_activePlayer, m_antBox, m_error, m_gameSpeed, 1);
 		if (m_showAntOverlay)
 		{
 			RenderAntOverlay(m_overlayAnts);

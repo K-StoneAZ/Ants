@@ -1516,6 +1516,7 @@ void HandleAttackClick(ClickType click, int row = -1, int col = -1)
             if (!player.selectT)
             {
                 m_error = "Select movement target.";
+                PlaySound("Error1.wav");
                 RequestRepaint();
                 return;
             }

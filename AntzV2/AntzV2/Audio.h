@@ -15,9 +15,10 @@ private:
 		bool loop = false;
     };
 
-    const SoundInfo soundInventory[7] =
+    const SoundInfo soundInventory[8] =
     {
         { "Error.wav",      false, false },
+        { "Error1.wav",      false, false },
         { "Failed.wav",     false, false },
         { "Growth.wav",     false, false },
         { "Marching.wav",   false, false },

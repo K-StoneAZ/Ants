@@ -155,6 +155,7 @@
   <ItemGroup>
     <Media Include="..\x64\Debug\BattleRound.wav" />
     <Media Include="..\x64\Debug\Error.wav" />
+    <Media Include="..\x64\Debug\Error1.wav" />
     <Media Include="..\x64\Debug\Failed.wav" />
     <Media Include="..\x64\Debug\Growth.wav" />
     <Media Include="..\x64\Debug\Marching.wav" />

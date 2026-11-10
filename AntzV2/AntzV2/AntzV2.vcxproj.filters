@@ -110,5 +110,8 @@
     <Media Include="..\x64\Debug\Error.wav">
       <Filter>Resource Files</Filter>
     </Media>
+    <Media Include="..\x64\Debug\Error1.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>

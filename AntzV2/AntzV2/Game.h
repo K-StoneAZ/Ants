@@ -981,7 +981,7 @@ void UpdateAttack()
     }
     else
     {
-
+        PlaySound("Dice.wav");
         // One battle tick here
         player.attackRoll = 1 + (gRNG() % 100) + bonus;
             if (player.attackRoll > 100) { player.attackRoll = 100; }

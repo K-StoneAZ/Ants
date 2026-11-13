@@ -75,9 +75,6 @@ private:
     int m_tickCount = 0;// Number of AI_TIMER callbacks
     int m_delay = 0;// Number of ticks required before advancing
 
-    bool m_soundResult = false; // false = success, true = fail
-    bool m_soundResultPending = false;
-
     std::string m_error = "";
 	 
 
@@ -969,19 +966,6 @@ void UpdateAttack()
 {
     PlayerData& player = m_players[m_activePlayer];
 
-    if(m_soundResultPending)
-            {
-        if (m_soundResult)
-        {
-            PlaySound("Failed.wav");
-        }
-        else
-        {
-            PlaySound("Success.wav");
-        }
-        m_soundResultPending = false;
-	}
-
     // Unowned cell
     int bonus = player.sant - player.tant;
 
@@ -1020,8 +1004,7 @@ void UpdateAttack()
         if (player.sant <= 0)
         {
             // attack failed
-            m_soundResult = true;
-            m_soundResultPending = true;
+            PlaySound("Failed.wav");
             StopTimer(Timer::Battle);
             m_renderer.SetBattleActive(false);
             m_dialog.m_mode = DIALOG_MOVE;
@@ -1044,8 +1027,7 @@ void UpdateAttack()
         if (player.tant <= 0)
         {
             // attack succeeded
-            m_soundResult = false;
-            m_soundResultPending = true;
+            PlaySound("Success.wav");
             // Capture target
             m_field.setOwner(player.trow, player.tcol, m_activePlayer);
             m_field.setAnts(player.trow, player.tcol, player.sant);

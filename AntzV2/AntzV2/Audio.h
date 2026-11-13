@@ -50,6 +50,10 @@ private:
     int m_effectsVolume = 100;
     std::string m_path = "";
 
+    // Dice-to-result sound sequencing
+    ma_uint64 m_diceFinishTime = 0;
+    bool m_diceSequencePending = false;
+
 public:
     bool Initialize(std::string path)
     {

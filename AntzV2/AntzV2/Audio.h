@@ -154,9 +154,59 @@ public:
         if (loaded.loop && ma_sound_is_playing(&loaded.sound))
             return true;
 
-        return ma_sound_start(&loaded.sound) == MA_SUCCESS;
-    }
+        bool isDice = loaded.filename == "Dice.wav";
+        bool isResult =
+            loaded.filename == "Success.wav" ||
+            loaded.filename == "Failed.wav";
 
+        // Schedule a battle result after the final Dice sound.
+        if (isResult && m_diceSequencePending)
+        {
+            ma_uint64 currentTime =
+                ma_engine_get_time_in_pcm_frames(&m_engine);
+
+            if (m_diceFinishTime > currentTime)
+            {
+                ma_sound_set_start_time_in_pcm_frames(
+                    &loaded.sound, m_diceFinishTime);
+            }
+
+            m_diceSequencePending = false;
+        }
+
+        ma_uint64 diceStartTime = 0;
+        ma_uint64 diceLengthFrames = 0;
+
+        // Record the expected finish time for Dice.wav.
+        if (isDice)
+        {
+            float diceLengthSeconds = 0.0f;
+
+            if (ma_sound_get_length_in_seconds(
+                &loaded.sound, &diceLengthSeconds) == MA_SUCCESS)
+            {
+                diceStartTime =
+                    ma_engine_get_time_in_pcm_frames(&m_engine);
+
+                diceLengthFrames = static_cast<ma_uint64>(
+                    static_cast<double>(diceLengthSeconds) *
+                    ma_engine_get_sample_rate(&m_engine));
+            }
+        }
+
+        // Start the requested sound.
+        if (ma_sound_start(&loaded.sound) != MA_SUCCESS)
+            return false;
+
+        // Save Dice's expected finish time.
+        if (isDice && diceLengthFrames > 0)
+        {
+            m_diceFinishTime = diceStartTime + diceLengthFrames;
+            m_diceSequencePending = true;
+        }
+
+        return true;
+    }
     bool StopFile(const char* fileName)
     {
         if (!m_initialized || !fileName)
